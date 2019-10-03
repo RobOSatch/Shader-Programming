@@ -1,0 +1,11 @@
+﻿  EZG-1.cpp
+C:\Users\robar\source\repos\EZG-1\EZG-1\Shader.h(4): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(219): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(315): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(316): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(320): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(321): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(323): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(324): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(333): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+  EZG-1.vcxproj -> C:\Users\robar\source\repos\EZG-1\Debug\EZG-1.exe
