@@ -30,6 +30,18 @@
     <None Include="fragmentShader.frag">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="lightShader.vert">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="lightShader.frag">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="lampShader.frag">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="lampShader.vert">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader.h">
