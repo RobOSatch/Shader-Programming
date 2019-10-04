@@ -32,6 +32,38 @@ float lastFrame = 0.0f;
 // lighting
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
+// CATMULL TIME
+void catmullRomSpline(glm::vec3 p0, glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, Shader shader, glm::mat4 model) {
+	float a = 0.0f; // Tension
+	float b = 0.0f; // Bias
+	float c = 0.0f; // Continuity
+
+	glm::vec3 sourceVec1 = p1 - p0;
+	glm::vec3 destinationVec1 = p2 - p1;
+	glm::vec3 sourceVec2 = p2 - p1;
+	glm::vec3 destinationVec2 = p3 - p2;
+	glm::vec3 sourceTangent = (1.0f - a) * (1.0f + b) * (1.0f - c) / 2.0f * sourceVec1 + (1.0f - a) * (1.0f - b) * (1.0f + c) * destinationVec1;
+	glm::vec3 destinationTangent = (1.0f - a) * (1.0f + b) * (1.0f + c) / 2.0f * sourceVec2 + (1.0f - a) * (1.0f - b) * (1.0f - c) * destinationVec2;
+
+	float t = 0.0f;
+	while (t <= 1.0f) {
+		glm::vec3 point0 = (2.0f * pow(t, 3) - 3.0f * pow(t, 2) + 1.0f) * p1;
+		glm::vec3 m0 = (pow(t, 3) - 2.0f * pow(t, 2) + t) * sourceTangent;
+		glm::vec3 m1 = (pow(t, 3) - pow(t, 2)) * destinationTangent;
+		glm::vec3 point1 = (-2.0f * pow(t, 3) + 3.0f * pow(t, 2)) * p2;
+		glm::vec3 result = point0 + m0 + m1 + point1;
+
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, result);
+		model = glm::scale(model, glm::vec3(0.05f));
+		shader.setMat4("model", model);
+
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		t += 0.001f;
+	}
+}
+
 int main()
 {
 	// glfw: initialize and configure
@@ -266,11 +298,15 @@ int main()
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 
+		catmullRomSpline(waypoints[0], waypoints[0], waypoints[1], waypoints[2], lampShader, model);
+		catmullRomSpline(waypoints[0], waypoints[1], waypoints[2], waypoints[3], lampShader, model);
+		catmullRomSpline(waypoints[1], waypoints[2], waypoints[3], waypoints[3], lampShader, model);
+		
 		// Move camera
 		glm::vec3 waypoint = waypoints[currentWaypoint];
 		glm::vec3 direction = glm::normalize(waypoint - camera.Position);
 		direction.y = 0;
-		camera.Position += direction * 0.02f;
+		//camera.Position += direction * 0.02f;
 
 		float sum = (camera.Position.x - waypoint.x) +
 			(camera.Position.z - waypoint.z);
