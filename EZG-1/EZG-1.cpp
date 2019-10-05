@@ -29,11 +29,13 @@ bool firstMouse = true;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
+float speed = 0.005f;
+
 // lighting
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
 // CATMULL TIME
-void catmullRomSpline(glm::vec3 p0, glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, Shader shader, glm::mat4 model) {
+glm::vec3 catmullRomSpline(glm::vec3 p0, glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, float t) {
 	float a = 0.0f; // Tension
 	float b = 0.0f; // Bias
 	float c = 0.0f; // Continuity
@@ -45,23 +47,12 @@ void catmullRomSpline(glm::vec3 p0, glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, Sh
 	glm::vec3 sourceTangent = (1.0f - a) * (1.0f + b) * (1.0f - c) / 2.0f * sourceVec1 + (1.0f - a) * (1.0f - b) * (1.0f + c) * destinationVec1;
 	glm::vec3 destinationTangent = (1.0f - a) * (1.0f + b) * (1.0f + c) / 2.0f * sourceVec2 + (1.0f - a) * (1.0f - b) * (1.0f - c) * destinationVec2;
 
-	float t = 0.0f;
-	while (t <= 1.0f) {
-		glm::vec3 point0 = (2.0f * pow(t, 3) - 3.0f * pow(t, 2) + 1.0f) * p1;
-		glm::vec3 m0 = (pow(t, 3) - 2.0f * pow(t, 2) + t) * sourceTangent;
-		glm::vec3 m1 = (pow(t, 3) - pow(t, 2)) * destinationTangent;
-		glm::vec3 point1 = (-2.0f * pow(t, 3) + 3.0f * pow(t, 2)) * p2;
-		glm::vec3 result = point0 + m0 + m1 + point1;
+	glm::vec3 point0 = (2.0f * pow(t, 3) - 3.0f * pow(t, 2) + 1.0f) * p1;
+	glm::vec3 m0 = (pow(t, 3) - 2.0f * pow(t, 2) + t) * sourceTangent;
+	glm::vec3 m1 = (pow(t, 3) - pow(t, 2)) * destinationTangent;
+	glm::vec3 point1 = (-2.0f * pow(t, 3) + 3.0f * pow(t, 2)) * p2;
 
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, result);
-		model = glm::scale(model, glm::vec3(0.05f));
-		shader.setMat4("model", model);
-
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
-		t += 0.001f;
-	}
+	return point0 + m0 + m1 + point1;
 }
 
 int main()
@@ -170,11 +161,15 @@ int main()
 		 planeRadius,  -0.5f, -planeRadius,  0.0f,  1.0f,  0.0f
 	};
 
-	glm::vec3 waypoints[] = {
+	std::vector<glm::vec3> waypoints = {
 		glm::vec3(8.0f,  0.5f,  8.0f),
 		glm::vec3(5.0f,  0.5f, 3.0f),
 		glm::vec3(-3.0f,  0.5f, -5.0f),
-		glm::vec3(-7.0f,  0.5f, 4.0f)
+		glm::vec3(-7.0f,  0.5f, 4.0f),
+		glm::vec3(6.0f, 0.5f, 4.0f),
+		glm::vec3(8.0f, 0.5f, 5.0f),
+		glm::vec3(6.0f, 0.5f, 6.0f),
+		glm::vec3(8.0f, 0.5f, 7.0f)
 	};
 
 	int currentWaypoint = 0;
@@ -218,6 +213,7 @@ int main()
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
 
+	float t = 0.0f;
 	// render loop
 	// -----------
 	while (!glfwWindowShouldClose(window))
@@ -289,7 +285,7 @@ int main()
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		// Draw waypoints
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < waypoints.size(); i++) {
 			model = glm::mat4(1.0f);
 			model = glm::translate(model, waypoints[i]);
 			model = glm::scale(model, glm::vec3(0.1f));
@@ -298,24 +294,59 @@ int main()
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 
-		catmullRomSpline(waypoints[0], waypoints[0], waypoints[1], waypoints[2], lampShader, model);
-		catmullRomSpline(waypoints[0], waypoints[1], waypoints[2], waypoints[3], lampShader, model);
-		catmullRomSpline(waypoints[1], waypoints[2], waypoints[3], waypoints[3], lampShader, model);
-		
-		// Move camera
-		glm::vec3 waypoint = waypoints[currentWaypoint];
-		glm::vec3 direction = glm::normalize(waypoint - camera.Position);
-		direction.y = 0;
-		//camera.Position += direction * 0.02f;
+		std::cout << currentWaypoint << std::endl;
+		// Draw splines
+		glm::vec3 curvePoint;
+		if (t <= 1.0f && currentWaypoint != waypoints.size() - 1) {
+			if (currentWaypoint == 0) {
+				curvePoint = catmullRomSpline(waypoints[currentWaypoint], waypoints[currentWaypoint], waypoints[currentWaypoint + 1], waypoints[currentWaypoint + 2], t);
+			}
+			else if (currentWaypoint == waypoints.size() - 2) {
+				curvePoint = catmullRomSpline(waypoints[currentWaypoint - 1], waypoints[currentWaypoint], waypoints[currentWaypoint + 1], waypoints[currentWaypoint + 1], t);
+			}
+			else {
+				curvePoint = catmullRomSpline(waypoints[currentWaypoint - 1], waypoints[currentWaypoint], waypoints[currentWaypoint + 1], waypoints[currentWaypoint + 2], t);
+			}
 
-		float sum = (camera.Position.x - waypoint.x) +
-			(camera.Position.z - waypoint.z);
+			camera.Position = curvePoint;
+			t += speed;
+		}
 
-		if (sum <= 0.5f && currentWaypoint < 4)
+		if (t >= 1.0f) {
+			t = 0.0f;
 			currentWaypoint++;
+		}
 
-		if (currentWaypoint == 4)
-			currentWaypoint = 0;
+		/**
+		while (t <= 1.0f) {
+			curvePoint = catmullRomSpline(waypoints[0], waypoints[0], waypoints[1], waypoints[2], t);
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, curvePoint);
+			model = glm::scale(model, glm::vec3(0.05f));
+			lampShader.setMat4("model", model);
+
+			//glDrawArrays(GL_TRIANGLES, 0, 36);
+			camera.Position += glm::normalize(curvePoint - camera.Position) * 0.02f;
+
+			curvePoint = catmullRomSpline(waypoints[0], waypoints[1], waypoints[2], waypoints[3], t);
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, curvePoint);
+			model = glm::scale(model, glm::vec3(0.05f));
+			lampShader.setMat4("model", model);
+
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+
+			curvePoint = catmullRomSpline(waypoints[1], waypoints[2], waypoints[3], waypoints[3], t);
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, curvePoint);
+			model = glm::scale(model, glm::vec3(0.05f));
+			lampShader.setMat4("model", model);
+
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+
+			t += 0.001f;
+		}
+		*/
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------
@@ -354,6 +385,11 @@ void processInput(GLFWwindow * window)
 		camera.ProcessKeyboard(UP, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
 		camera.ProcessKeyboard(DOWN, deltaTime);
+
+	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+		speed = fmin(0.5f, speed + 0.0001f);
+	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+		speed = fmax(0.0f, speed - 0.0001f);
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
