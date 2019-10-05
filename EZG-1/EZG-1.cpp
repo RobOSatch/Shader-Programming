@@ -34,7 +34,19 @@ float speed = 0.005f;
 // lighting
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
-// CATMULL TIME
+/**
+*
+* CATMULL TIME
+* Calculates the point for the Catmull-Rom Spline located between points p1 and p2 at t.
+*
+* PARAMS:
+* p0 - The point before the curve
+* p1 - The starting point of the curve
+* p2 - The end point of the curve
+* p3 - The point after the curve
+* t - The interpolation parameter, going from 0 to 1, where 0 is the start and 1 is the end of the curve
+*
+*/
 glm::vec3 catmullRomSpline(glm::vec3 p0, glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, float t) {
 	float a = 0.0f; // Tension
 	float b = 0.0f; // Bias
