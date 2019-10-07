@@ -29,7 +29,7 @@ bool firstMouse = true;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
-float speed = 0.005f;
+float speed = 0.01f;
 
 // lighting
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
@@ -224,6 +224,8 @@ int main()
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	
+	camera.Position = waypoints[0];
 
 	float t = 0.0f;
 	// render loop
@@ -306,22 +308,35 @@ int main()
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 
-		std::cout << currentWaypoint << std::endl;
+		std::cout << camera.Position.x << " " << camera.Position.y << " " << camera.Position.z << std::endl;
 		// Draw splines
-		glm::vec3 curvePoint;
+		glm::vec3 nextPosition;
 		if (t <= 1.0f && currentWaypoint != waypoints.size() - 1) {
-			if (currentWaypoint == 0) {
-				curvePoint = catmullRomSpline(waypoints[currentWaypoint], waypoints[currentWaypoint], waypoints[currentWaypoint + 1], waypoints[currentWaypoint + 2], t);
-			}
-			else if (currentWaypoint == waypoints.size() - 2) {
-				curvePoint = catmullRomSpline(waypoints[currentWaypoint - 1], waypoints[currentWaypoint], waypoints[currentWaypoint + 1], waypoints[currentWaypoint + 1], t);
-			}
-			else {
-				curvePoint = catmullRomSpline(waypoints[currentWaypoint - 1], waypoints[currentWaypoint], waypoints[currentWaypoint + 1], waypoints[currentWaypoint + 2], t);
-			}
+			float e = 0.0001;
+			bool done = false;
 
-			camera.Position = curvePoint;
-			t += speed;
+			while (!done) {
+				if (currentWaypoint == 0) {
+					nextPosition = catmullRomSpline(waypoints[currentWaypoint], waypoints[currentWaypoint], waypoints[currentWaypoint + 1], waypoints[currentWaypoint + 2], t);
+				}
+				else if (currentWaypoint == waypoints.size() - 2) {
+					nextPosition = catmullRomSpline(waypoints[currentWaypoint - 1], waypoints[currentWaypoint], waypoints[currentWaypoint + 1], waypoints[currentWaypoint + 1], t);
+				}
+				else {
+					nextPosition = catmullRomSpline(waypoints[currentWaypoint - 1], waypoints[currentWaypoint], waypoints[currentWaypoint + 1], waypoints[currentWaypoint + 2], t);
+				}
+
+				glm::vec3 direction = nextPosition - camera.Position;
+				float distance = glm::length(direction);
+				std::cout << distance << std::endl;
+
+				if (distance <= speed + 0.001 && distance >= speed - 0.001) {
+					done = true;
+					camera.Position = nextPosition;	
+				}
+
+				t += e;
+			}
 		}
 
 		if (t >= 1.0f) {
