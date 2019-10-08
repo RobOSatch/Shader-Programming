@@ -29,7 +29,7 @@ bool firstMouse = true;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
-float speed = 0.01f;
+float speed = 0.13f;
 
 // lighting
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
@@ -181,8 +181,13 @@ int main()
 		glm::vec3(6.0f, 0.5f, 4.0f),
 		glm::vec3(8.0f, 0.5f, 5.0f),
 		glm::vec3(6.0f, 0.5f, 6.0f),
-		glm::vec3(8.0f, 0.5f, 7.0f)
+		glm::vec3(8.0f, 0.5f, 7.0f),
+		glm::vec3(10.0f, 1.5f, 5.0f),
+		glm::vec3(-10.0f, 5.0f, -1.0f),
+		glm::vec3(-12.0f, 1.0f, 5.0f)
 	};
+
+	std::vector<glm::vec3> curvePoints;
 
 	int currentWaypoint = 0;
 
@@ -308,11 +313,48 @@ int main()
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 
-		std::cout << camera.Position.x << " " << camera.Position.y << " " << camera.Position.z << std::endl;
+		// Visualize curve
+		bool visualize = true;
+		glm::vec3 pos;
+		if (visualize) {
+			for (int i = 0; i < waypoints.size() - 1; i++) {
+				for (float p = 0.0f; p <= 1.0f; p += 0.01f) {
+					if (i == 0) {
+						pos = catmullRomSpline(waypoints[i], waypoints[i], waypoints[i + 1], waypoints[i + 2], p);
+					}
+					else if (i == waypoints.size() - 2) {
+						pos = catmullRomSpline(waypoints[i - 1], waypoints[i], waypoints[i + 1], waypoints[i + 1], p);
+					}
+					else {
+						pos = catmullRomSpline(waypoints[i - 1], waypoints[i], waypoints[i + 1], waypoints[i + 2], p);
+					}
+
+					pos.y -= 0.1f;
+					model = glm::mat4(1.0f);
+					model = glm::translate(model, pos);
+					model = glm::scale(model, glm::vec3(0.05f));
+					lampShader.setMat4("model", model);
+
+					glDrawArrays(GL_TRIANGLES, 0, 36);
+				}
+			}
+		}
+
+		/**
+		for (int i = 0; i < curvePoints.size(); i += 10) {
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, curvePoints[i]);
+			model = glm::scale(model, glm::vec3(0.05f));
+			lampShader.setMat4("model", model);
+
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
+		*/
+
 		// Draw splines
 		glm::vec3 nextPosition;
 		if (t <= 1.0f && currentWaypoint != waypoints.size() - 1) {
-			float e = 0.0001;
+			float e = 0.1;
 			bool done = false;
 
 			while (!done) {
@@ -330,12 +372,18 @@ int main()
 				float distance = glm::length(direction);
 				std::cout << distance << std::endl;
 
-				if (distance <= speed + 0.001 && distance >= speed - 0.001) {
+				if (distance <= speed + 0.1 && distance >= speed - 0.1) {
 					done = true;
-					camera.Position = nextPosition;	
+					camera.Position = nextPosition;
+					//curvePoints.push_back(nextPosition);
 				}
 
-				t += e;
+				t += e * deltaTime * speed;
+
+				if (distance >= 5.0f) {
+					camera.Position = nextPosition;
+					done = true;
+				}
 			}
 		}
 
@@ -414,9 +462,9 @@ void processInput(GLFWwindow * window)
 		camera.ProcessKeyboard(DOWN, deltaTime);
 
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-		speed = fmin(0.5f, speed + 0.0001f);
+		speed = fmin(0.5f, speed + 0.001f);
 	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-		speed = fmax(0.0f, speed - 0.0001f);
+		speed = fmax(0.0f, speed - 0.001f);
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
