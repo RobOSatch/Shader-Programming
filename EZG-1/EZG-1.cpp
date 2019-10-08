@@ -187,6 +187,11 @@ int main()
 		glm::vec3(-12.0f, 1.0f, 5.0f)
 	};
 
+	std::vector<glm::quat> rotations = {
+		glm::quat(glm::vec3(9.0f, 90.0f, 0.0f)),
+		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f))
+	};
+
 	std::vector<glm::vec3> curvePoints;
 
 	int currentWaypoint = 0;
@@ -370,11 +375,18 @@ int main()
 
 				glm::vec3 direction = nextPosition - camera.Position;
 				float distance = glm::length(direction);
-				std::cout << distance << std::endl;
 
 				if (distance <= speed + 0.1 && distance >= speed - 0.1) {
 					done = true;
 					camera.Position = nextPosition;
+					glm::quat currentView = glm::quat(camera.GetViewMatrix());
+					glm::quat i = glm::mix(currentView, rotations[0], t);
+					float pitch = atan2(2 * i.x * i.w + 2 * i.y * i.z, 1 - 2 * i.x * i.x - 2 * i.z * i.z);
+					float yaw = asin(2 * i.x * i.y + 2 * i.z * i.w);
+					camera.Yaw += yaw;
+					camera.Pitch += pitch;
+					camera.updateCameraVectors();
+					// Do stuff with interpolated value?
 					//curvePoints.push_back(nextPosition);
 				}
 
@@ -494,7 +506,7 @@ void mouse_callback(GLFWwindow * window, double xpos, double ypos)
 	lastX = xpos;
 	lastY = ypos;
 
-	camera.ProcessMouseMovement(xoffset, yoffset);
+	//camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
