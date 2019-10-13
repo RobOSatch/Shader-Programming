@@ -4,11 +4,18 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
+#include "glm/gtx/quaternion.hpp"
 
 #include "Shader.h"
 #include "Camera.h"
+#include "interpolation.h"
 
 #include <iostream>
+
+enum Game_Mode {
+	CREATE,
+	RIDE
+};
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -34,38 +41,8 @@ float speed = 0.13f;
 // lighting
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
-/**
-*
-* CATMULL TIME
-* Calculates the point for the Catmull-Rom Spline located between points p1 and p2 at t.
-*
-* PARAMS:
-* p0 - The point before the curve
-* p1 - The starting point of the curve
-* p2 - The end point of the curve
-* p3 - The point after the curve
-* t - The interpolation parameter, going from 0 to 1, where 0 is the start and 1 is the end of the curve
-*
-*/
-glm::vec3 catmullRomSpline(glm::vec3 p0, glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, float t) {
-	float a = 0.0f; // Tension
-	float b = 0.0f; // Bias
-	float c = 0.0f; // Continuity
+Game_Mode gameMode = CREATE;
 
-	glm::vec3 sourceVec1 = p1 - p0;
-	glm::vec3 destinationVec1 = p2 - p1;
-	glm::vec3 sourceVec2 = p2 - p1;
-	glm::vec3 destinationVec2 = p3 - p2;
-	glm::vec3 sourceTangent = (1.0f - a) * (1.0f + b) * (1.0f - c) / 2.0f * sourceVec1 + (1.0f - a) * (1.0f - b) * (1.0f + c) * destinationVec1;
-	glm::vec3 destinationTangent = (1.0f - a) * (1.0f + b) * (1.0f + c) / 2.0f * sourceVec2 + (1.0f - a) * (1.0f - b) * (1.0f - c) * destinationVec2;
-
-	glm::vec3 point0 = (2.0f * pow(t, 3) - 3.0f * pow(t, 2) + 1.0f) * p1;
-	glm::vec3 m0 = (pow(t, 3) - 2.0f * pow(t, 2) + t) * sourceTangent;
-	glm::vec3 m1 = (pow(t, 3) - pow(t, 2)) * destinationTangent;
-	glm::vec3 point1 = (-2.0f * pow(t, 3) + 3.0f * pow(t, 2)) * p2;
-
-	return point0 + m0 + m1 + point1;
-}
 
 int main()
 {
@@ -75,10 +52,6 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-#ifdef __APPLE__
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // uncomment this statement to fix compilation on OS X
-#endif
 
 	// glfw window creation
 	// --------------------
@@ -184,12 +157,44 @@ int main()
 		glm::vec3(8.0f, 0.5f, 7.0f),
 		glm::vec3(10.0f, 1.5f, 5.0f),
 		glm::vec3(-10.0f, 5.0f, -1.0f),
-		glm::vec3(-12.0f, 1.0f, 5.0f)
+		glm::vec3(-12.0f, 1.0f, 5.0f),
+		glm::vec3(-8.0f, 3.0f, 1.0f),
+		glm::vec3(-8.0f, 5.0f, 1.0f),
+		glm::vec3(-8.0f, 7.0f, 1.0f),
+		glm::vec3(-8.0f, 10.0f, 1.0f),
+		glm::vec3(-12.0f, 15.0f, 5.0f),
+		glm::vec3(-15.0f, 22.0f, 1.0f),
+		glm::vec3(5.0f, 18.0f, 3.0f),
+		glm::vec3(8.0f, 10.0f, 1.0f),
+		glm::vec3(-8.0f, 1.0f, 1.0f)
 	};
 
-	std::vector<glm::quat> rotations = {
-		glm::quat(glm::vec3(9.0f, 90.0f, 0.0f)),
+	std::vector<glm::quat> directions = {
+		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
+		glm::quat(glm::vec3(0.0f, -90.0f, 0.0f)),
+		glm::quat(glm::vec3(20.0f, -45.0f, 0.0f)),
+		glm::quat(glm::vec3(-20.0f, 0.0f, 0.0f)),
+		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
+		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
+		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
+		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
+		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
+		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
+		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
+		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
+		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
+		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
+		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
+		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
+		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
+		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
+		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
 		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f))
+	};
+
+	std::vector<glm::vec3> orientations = {
+		glm::vec3(0.0f, 1.0f, 0.0f),
+		glm::vec3(0.0f, -1.0f, 0.0f)
 	};
 
 	std::vector<glm::vec3> curvePoints;
@@ -325,13 +330,13 @@ int main()
 			for (int i = 0; i < waypoints.size() - 1; i++) {
 				for (float p = 0.0f; p <= 1.0f; p += 0.01f) {
 					if (i == 0) {
-						pos = catmullRomSpline(waypoints[i], waypoints[i], waypoints[i + 1], waypoints[i + 2], p);
+						pos = interpolation::catmullRomSpline(waypoints[i], waypoints[i], waypoints[i + 1], waypoints[i + 2], p);
 					}
 					else if (i == waypoints.size() - 2) {
-						pos = catmullRomSpline(waypoints[i - 1], waypoints[i], waypoints[i + 1], waypoints[i + 1], p);
+						pos = interpolation::catmullRomSpline(waypoints[i - 1], waypoints[i], waypoints[i + 1], waypoints[i + 1], p);
 					}
 					else {
-						pos = catmullRomSpline(waypoints[i - 1], waypoints[i], waypoints[i + 1], waypoints[i + 2], p);
+						pos = interpolation::catmullRomSpline(waypoints[i - 1], waypoints[i], waypoints[i + 1], waypoints[i + 2], p);
 					}
 
 					pos.y -= 0.1f;
@@ -345,32 +350,25 @@ int main()
 			}
 		}
 
-		/**
-		for (int i = 0; i < curvePoints.size(); i += 10) {
-			model = glm::mat4(1.0f);
-			model = glm::translate(model, curvePoints[i]);
-			model = glm::scale(model, glm::vec3(0.05f));
-			lampShader.setMat4("model", model);
-
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}
-		*/
-
 		// Draw splines
 		glm::vec3 nextPosition;
+		glm::quat nextOrientation;
 		if (t <= 1.0f && currentWaypoint != waypoints.size() - 1) {
 			float e = 0.1;
 			bool done = false;
 
 			while (!done) {
 				if (currentWaypoint == 0) {
-					nextPosition = catmullRomSpline(waypoints[currentWaypoint], waypoints[currentWaypoint], waypoints[currentWaypoint + 1], waypoints[currentWaypoint + 2], t);
+					nextPosition = interpolation::catmullRomSpline(waypoints[currentWaypoint], waypoints[currentWaypoint], waypoints[currentWaypoint + 1], waypoints[currentWaypoint + 2], t);
+					nextOrientation = interpolation::squad(directions[currentWaypoint], directions[currentWaypoint], directions[currentWaypoint + 1], directions[currentWaypoint + 2], t);
 				}
 				else if (currentWaypoint == waypoints.size() - 2) {
-					nextPosition = catmullRomSpline(waypoints[currentWaypoint - 1], waypoints[currentWaypoint], waypoints[currentWaypoint + 1], waypoints[currentWaypoint + 1], t);
+					nextPosition = interpolation::catmullRomSpline(waypoints[currentWaypoint - 1], waypoints[currentWaypoint], waypoints[currentWaypoint + 1], waypoints[currentWaypoint + 1], t);
+					nextOrientation = interpolation::squad(directions[currentWaypoint - 1], directions[currentWaypoint], directions[currentWaypoint + 1], directions[currentWaypoint + 1], t);
 				}
 				else {
-					nextPosition = catmullRomSpline(waypoints[currentWaypoint - 1], waypoints[currentWaypoint], waypoints[currentWaypoint + 1], waypoints[currentWaypoint + 2], t);
+					nextPosition = interpolation::catmullRomSpline(waypoints[currentWaypoint - 1], waypoints[currentWaypoint], waypoints[currentWaypoint + 1], waypoints[currentWaypoint + 2], t);
+					nextOrientation = interpolation::squad(directions[currentWaypoint - 1], directions[currentWaypoint], directions[currentWaypoint + 1], directions[currentWaypoint + 2], t);
 				}
 
 				glm::vec3 direction = nextPosition - camera.Position;
@@ -379,15 +377,10 @@ int main()
 				if (distance <= speed + 0.1 && distance >= speed - 0.1) {
 					done = true;
 					camera.Position = nextPosition;
-					glm::quat currentView = glm::quat(camera.GetViewMatrix());
-					glm::quat i = glm::mix(currentView, rotations[0], t);
-					float pitch = atan2(2 * i.x * i.w + 2 * i.y * i.z, 1 - 2 * i.x * i.x - 2 * i.z * i.z);
-					float yaw = asin(2 * i.x * i.y + 2 * i.z * i.w);
-					camera.Yaw += yaw;
-					camera.Pitch += pitch;
-					camera.updateCameraVectors();
-					// Do stuff with interpolated value?
-					//curvePoints.push_back(nextPosition);
+					camera.Orientation = nextOrientation;
+
+					// SLERP
+					//camera.Orientation = glm::slerp(directions[currentWaypoint], directions[currentWaypoint + 1], t);
 				}
 
 				t += e * deltaTime * speed;
@@ -403,37 +396,6 @@ int main()
 			t = 0.0f;
 			currentWaypoint++;
 		}
-
-		/**
-		while (t <= 1.0f) {
-			curvePoint = catmullRomSpline(waypoints[0], waypoints[0], waypoints[1], waypoints[2], t);
-			model = glm::mat4(1.0f);
-			model = glm::translate(model, curvePoint);
-			model = glm::scale(model, glm::vec3(0.05f));
-			lampShader.setMat4("model", model);
-
-			//glDrawArrays(GL_TRIANGLES, 0, 36);
-			camera.Position += glm::normalize(curvePoint - camera.Position) * 0.02f;
-
-			curvePoint = catmullRomSpline(waypoints[0], waypoints[1], waypoints[2], waypoints[3], t);
-			model = glm::mat4(1.0f);
-			model = glm::translate(model, curvePoint);
-			model = glm::scale(model, glm::vec3(0.05f));
-			lampShader.setMat4("model", model);
-
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-
-			curvePoint = catmullRomSpline(waypoints[1], waypoints[2], waypoints[3], waypoints[3], t);
-			model = glm::mat4(1.0f);
-			model = glm::translate(model, curvePoint);
-			model = glm::scale(model, glm::vec3(0.05f));
-			lampShader.setMat4("model", model);
-
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-
-			t += 0.001f;
-		}
-		*/
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------
@@ -506,7 +468,7 @@ void mouse_callback(GLFWwindow * window, double xpos, double ypos)
 	lastX = xpos;
 	lastY = ypos;
 
-	//camera.ProcessMouseMovement(xoffset, yoffset);
+	camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
