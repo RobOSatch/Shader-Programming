@@ -21,6 +21,8 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 
 // settings
 const unsigned int SCR_WIDTH = 1920;
@@ -43,6 +45,32 @@ glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
 Game_Mode gameMode = CREATE;
 
+std::vector<glm::vec3> waypoints;
+std::vector<glm::quat> orientations;
+
+//std::vector<glm::quat> orientations = {
+//	glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
+//	glm::quat(glm::vec3(0.0f, -90.0f, 0.0f)),
+//	glm::quat(glm::vec3(20.0f, -45.0f, 0.0f)),
+//	glm::quat(glm::vec3(-20.0f, 0.0f, 0.0f)),
+//	glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
+//	glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
+//	glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
+//	glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
+//	glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
+//	glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
+//	glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
+//	glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
+//	glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
+//	glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
+//	glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
+//	glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
+//	glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
+//	glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
+//	glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
+//	glm::quat(glm::vec3(0.0f, 0.0f, 0.0f))
+//};
+
 
 int main()
 {
@@ -55,7 +83,7 @@ int main()
 
 	// glfw window creation
 	// --------------------
-	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Camera Ride", NULL, NULL);
 	if (window == NULL)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
@@ -66,6 +94,8 @@ int main()
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
+	glfwSetKeyCallback(window, key_callback);
+	glfwSetMouseButtonCallback(window, mouse_button_callback);
 
 	// tell GLFW to capture our mouse
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -146,7 +176,7 @@ int main()
 		 planeRadius,  -0.5f, -planeRadius,  0.0f,  1.0f,  0.0f
 	};
 
-	std::vector<glm::vec3> waypoints = {
+	/*std::vector<glm::vec3> waypoints = {
 		glm::vec3(8.0f,  0.5f,  8.0f),
 		glm::vec3(5.0f,  0.5f, 3.0f),
 		glm::vec3(-3.0f,  0.5f, -5.0f),
@@ -167,35 +197,7 @@ int main()
 		glm::vec3(5.0f, 18.0f, 3.0f),
 		glm::vec3(8.0f, 10.0f, 1.0f),
 		glm::vec3(-8.0f, 1.0f, 1.0f)
-	};
-
-	std::vector<glm::quat> directions = {
-		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
-		glm::quat(glm::vec3(0.0f, -90.0f, 0.0f)),
-		glm::quat(glm::vec3(20.0f, -45.0f, 0.0f)),
-		glm::quat(glm::vec3(-20.0f, 0.0f, 0.0f)),
-		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
-		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
-		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
-		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
-		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
-		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
-		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
-		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
-		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
-		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
-		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
-		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
-		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
-		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
-		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
-		glm::quat(glm::vec3(0.0f, 0.0f, 0.0f))
-	};
-
-	std::vector<glm::vec3> orientations = {
-		glm::vec3(0.0f, 1.0f, 0.0f),
-		glm::vec3(0.0f, -1.0f, 0.0f)
-	};
+	};*/
 
 	std::vector<glm::vec3> curvePoints;
 
@@ -239,8 +241,6 @@ int main()
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-	
-	camera.Position = waypoints[0];
 
 	float t = 0.0f;
 	// render loop
@@ -313,88 +313,90 @@ int main()
 		glBindVertexArray(lightVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
-		// Draw waypoints
-		for (int i = 0; i < waypoints.size(); i++) {
-			model = glm::mat4(1.0f);
-			model = glm::translate(model, waypoints[i]);
-			model = glm::scale(model, glm::vec3(0.1f));
-			lampShader.setMat4("model", model);
+		if (gameMode == RIDE) {
+			// Draw waypoints
+			/*for (int i = 0; i < waypoints.size(); i++) {
+				model = glm::mat4(1.0f);
+				model = glm::translate(model, waypoints[i]);
+				model = glm::scale(model, glm::vec3(0.1f));
+				lampShader.setMat4("model", model);
 
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}
+				glDrawArrays(GL_TRIANGLES, 0, 36);
+			}*/
 
-		// Visualize curve
-		bool visualize = true;
-		glm::vec3 pos;
-		if (visualize) {
-			for (int i = 0; i < waypoints.size() - 1; i++) {
-				for (float p = 0.0f; p <= 1.0f; p += 0.01f) {
-					if (i == 0) {
-						pos = interpolation::catmullRomSpline(waypoints[i], waypoints[i], waypoints[i + 1], waypoints[i + 2], p);
+			// Visualize curve
+			bool visualize = false;
+			glm::vec3 pos;
+			if (visualize) {
+				for (int i = 0; i < waypoints.size() - 1; i++) {
+					for (float p = 0.0f; p <= 1.0f; p += 0.01f) {
+						if (i == 0) {
+							pos = interpolation::catmullRomSpline(waypoints[i], waypoints[i], waypoints[i + 1], waypoints[i + 2], p);
+						}
+						else if (i == waypoints.size() - 2) {
+							pos = interpolation::catmullRomSpline(waypoints[i - 1], waypoints[i], waypoints[i + 1], waypoints[i + 1], p);
+						}
+						else {
+							pos = interpolation::catmullRomSpline(waypoints[i - 1], waypoints[i], waypoints[i + 1], waypoints[i + 2], p);
+						}
+
+						pos.y -= 0.1f;
+						model = glm::mat4(1.0f);
+						model = glm::translate(model, pos);
+						model = glm::scale(model, glm::vec3(0.05f));
+						lampShader.setMat4("model", model);
+
+						glDrawArrays(GL_TRIANGLES, 0, 36);
 					}
-					else if (i == waypoints.size() - 2) {
-						pos = interpolation::catmullRomSpline(waypoints[i - 1], waypoints[i], waypoints[i + 1], waypoints[i + 1], p);
+				}
+			}
+
+			// Draw splines
+			glm::vec3 nextPosition;
+			glm::quat nextOrientation;
+			if (t <= 1.0f && currentWaypoint != waypoints.size() - 1) {
+				float e = 0.1;
+				bool done = false;
+
+				while (!done) {
+					if (currentWaypoint == 0) {
+						nextPosition = interpolation::catmullRomSpline(waypoints[currentWaypoint], waypoints[currentWaypoint], waypoints[currentWaypoint + 1], waypoints[currentWaypoint + 2], t);
+						nextOrientation = interpolation::squad(orientations[currentWaypoint], orientations[currentWaypoint], orientations[currentWaypoint + 1], orientations[currentWaypoint + 2], t);
+					}
+					else if (currentWaypoint == waypoints.size() - 2) {
+						nextPosition = interpolation::catmullRomSpline(waypoints[currentWaypoint - 1], waypoints[currentWaypoint], waypoints[currentWaypoint + 1], waypoints[currentWaypoint + 1], t);
+						nextOrientation = interpolation::squad(orientations[currentWaypoint - 1], orientations[currentWaypoint], orientations[currentWaypoint + 1], orientations[currentWaypoint + 1], t);
 					}
 					else {
-						pos = interpolation::catmullRomSpline(waypoints[i - 1], waypoints[i], waypoints[i + 1], waypoints[i + 2], p);
+						nextPosition = interpolation::catmullRomSpline(waypoints[currentWaypoint - 1], waypoints[currentWaypoint], waypoints[currentWaypoint + 1], waypoints[currentWaypoint + 2], t);
+						nextOrientation = interpolation::squad(orientations[currentWaypoint - 1], orientations[currentWaypoint], orientations[currentWaypoint + 1], orientations[currentWaypoint + 2], t);
 					}
 
-					pos.y -= 0.1f;
-					model = glm::mat4(1.0f);
-					model = glm::translate(model, pos);
-					model = glm::scale(model, glm::vec3(0.05f));
-					lampShader.setMat4("model", model);
+					glm::vec3 direction = nextPosition - camera.Position;
+					float distance = glm::length(direction);
 
-					glDrawArrays(GL_TRIANGLES, 0, 36);
+					if (distance <= speed + 0.1 && distance >= speed - 0.1) {
+						done = true;
+						camera.Position = nextPosition;
+						camera.Orientation = nextOrientation;
+
+						// SLERP
+						//camera.Orientation = glm::slerp(firstQuat, secondQuat, t);
+					}
+
+					t += e * deltaTime * speed;
+
+					if (distance >= 5.0f) {
+						camera.Position = nextPosition;
+						done = true;
+					}
 				}
 			}
-		}
 
-		// Draw splines
-		glm::vec3 nextPosition;
-		glm::quat nextOrientation;
-		if (t <= 1.0f && currentWaypoint != waypoints.size() - 1) {
-			float e = 0.1;
-			bool done = false;
-
-			while (!done) {
-				if (currentWaypoint == 0) {
-					nextPosition = interpolation::catmullRomSpline(waypoints[currentWaypoint], waypoints[currentWaypoint], waypoints[currentWaypoint + 1], waypoints[currentWaypoint + 2], t);
-					nextOrientation = interpolation::squad(directions[currentWaypoint], directions[currentWaypoint], directions[currentWaypoint + 1], directions[currentWaypoint + 2], t);
-				}
-				else if (currentWaypoint == waypoints.size() - 2) {
-					nextPosition = interpolation::catmullRomSpline(waypoints[currentWaypoint - 1], waypoints[currentWaypoint], waypoints[currentWaypoint + 1], waypoints[currentWaypoint + 1], t);
-					nextOrientation = interpolation::squad(directions[currentWaypoint - 1], directions[currentWaypoint], directions[currentWaypoint + 1], directions[currentWaypoint + 1], t);
-				}
-				else {
-					nextPosition = interpolation::catmullRomSpline(waypoints[currentWaypoint - 1], waypoints[currentWaypoint], waypoints[currentWaypoint + 1], waypoints[currentWaypoint + 2], t);
-					nextOrientation = interpolation::squad(directions[currentWaypoint - 1], directions[currentWaypoint], directions[currentWaypoint + 1], directions[currentWaypoint + 2], t);
-				}
-
-				glm::vec3 direction = nextPosition - camera.Position;
-				float distance = glm::length(direction);
-
-				if (distance <= speed + 0.1 && distance >= speed - 0.1) {
-					done = true;
-					camera.Position = nextPosition;
-					camera.Orientation = nextOrientation;
-
-					// SLERP
-					//camera.Orientation = glm::slerp(directions[currentWaypoint], directions[currentWaypoint + 1], t);
-				}
-
-				t += e * deltaTime * speed;
-
-				if (distance >= 5.0f) {
-					camera.Position = nextPosition;
-					done = true;
-				}
+			if (t >= 1.0f) {
+				t = 0.0f;
+				currentWaypoint++;
 			}
-		}
-
-		if (t >= 1.0f) {
-			t = 0.0f;
-			currentWaypoint++;
 		}
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -439,6 +441,23 @@ void processInput(GLFWwindow * window)
 		speed = fmin(0.5f, speed + 0.001f);
 	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
 		speed = fmax(0.0f, speed - 0.001f);
+}
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	if (key == GLFW_KEY_ENTER && action == GLFW_PRESS && gameMode == CREATE) {
+		gameMode = RIDE;
+		camera.Position = waypoints[0];
+		camera.Orientation = orientations[0];
+	}
+}
+
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && gameMode == CREATE) {
+		waypoints.push_back(camera.Position);
+		orientations.push_back(camera.Orientation);
+	}
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
