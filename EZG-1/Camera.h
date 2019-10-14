@@ -67,16 +67,13 @@ public:
 		updateCameraVectors();
 	}
 
-	// Returns the view matrix calculated using Euler Angles and the LookAt Matrix
+	// Returns the view matrix calculated using quaternions
 	glm::mat4 GetViewMatrix()
 	{
-		//return glm::lookAt(Position, Position + Front, Up);
-
 		glm::quat xRotation = glm::quat(glm::vec3(-Pitch, 0.0f, 0.0f));
 		glm::quat yRotation = glm::quat(glm::vec3(0.0f, Yaw, 0.0f));
 		Pitch = Yaw = Roll = 0.0f;
 
-		//Orientation = newOrientation * Orientation;
 		Orientation *= yRotation;
 		Orientation = xRotation * Orientation;
 		Orientation = glm::normalize(Orientation);
@@ -144,10 +141,6 @@ public:
 	void updateCameraVectors()
 	{
 		// Calculate the new Front vector
-		/*glm::vec3 front;
-		front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-		front.y = sin(glm::radians(Pitch));
-		front.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));*/
 		Front = glm::normalize(glm::vec3(0.0f, 0.0f, -1.0f) * Orientation);
 		// Also re-calculate the Right and Up vector
 		Right = glm::normalize(glm::cross(Front, WorldUp));  // Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.

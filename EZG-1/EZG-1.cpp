@@ -48,29 +48,6 @@ Game_Mode gameMode = CREATE;
 std::vector<glm::vec3> waypoints;
 std::vector<glm::quat> orientations;
 
-//std::vector<glm::quat> orientations = {
-//	glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
-//	glm::quat(glm::vec3(0.0f, -90.0f, 0.0f)),
-//	glm::quat(glm::vec3(20.0f, -45.0f, 0.0f)),
-//	glm::quat(glm::vec3(-20.0f, 0.0f, 0.0f)),
-//	glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
-//	glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
-//	glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
-//	glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
-//	glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
-//	glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
-//	glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
-//	glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
-//	glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
-//	glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
-//	glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
-//	glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
-//	glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
-//	glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
-//	glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)),
-//	glm::quat(glm::vec3(0.0f, 0.0f, 0.0f))
-//};
-
 
 int main()
 {
@@ -176,29 +153,6 @@ int main()
 		 planeRadius,  -0.5f, -planeRadius,  0.0f,  1.0f,  0.0f
 	};
 
-	/*std::vector<glm::vec3> waypoints = {
-		glm::vec3(8.0f,  0.5f,  8.0f),
-		glm::vec3(5.0f,  0.5f, 3.0f),
-		glm::vec3(-3.0f,  0.5f, -5.0f),
-		glm::vec3(-7.0f,  0.5f, 4.0f),
-		glm::vec3(6.0f, 0.5f, 4.0f),
-		glm::vec3(8.0f, 0.5f, 5.0f),
-		glm::vec3(6.0f, 0.5f, 6.0f),
-		glm::vec3(8.0f, 0.5f, 7.0f),
-		glm::vec3(10.0f, 1.5f, 5.0f),
-		glm::vec3(-10.0f, 5.0f, -1.0f),
-		glm::vec3(-12.0f, 1.0f, 5.0f),
-		glm::vec3(-8.0f, 3.0f, 1.0f),
-		glm::vec3(-8.0f, 5.0f, 1.0f),
-		glm::vec3(-8.0f, 7.0f, 1.0f),
-		glm::vec3(-8.0f, 10.0f, 1.0f),
-		glm::vec3(-12.0f, 15.0f, 5.0f),
-		glm::vec3(-15.0f, 22.0f, 1.0f),
-		glm::vec3(5.0f, 18.0f, 3.0f),
-		glm::vec3(8.0f, 10.0f, 1.0f),
-		glm::vec3(-8.0f, 1.0f, 1.0f)
-	};*/
-
 	std::vector<glm::vec3> curvePoints;
 
 	int currentWaypoint = 0;
@@ -295,7 +249,7 @@ int main()
 
 		// draw the plane
 		model = glm::mat4(1.0f);
-		lightingShader.setVec3("objectColor", 0.5f, 1.0f, 0.31f);
+		lightingShader.setVec3("objectColor", 0.5f, 0.31f, 1.0f);
 		lightingShader.setMat4("model", model);
 
 		glBindVertexArray(planeVAO);
@@ -313,17 +267,19 @@ int main()
 		glBindVertexArray(lightVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
+		//if (gameMode == CREATE) {
+		//	// Draw waypoints
+		//	for (int i = 0; i < waypoints.size(); i++) {
+		//		model = glm::mat4(1.0f);
+		//		model = glm::translate(model, waypoints[i]);
+		//		model = glm::scale(model, glm::vec3(0.1f));
+		//		lampShader.setMat4("model", model);
+
+		//		glDrawArrays(GL_TRIANGLES, 0, 36);
+		//	}
+		//}
+
 		if (gameMode == RIDE) {
-			// Draw waypoints
-			/*for (int i = 0; i < waypoints.size(); i++) {
-				model = glm::mat4(1.0f);
-				model = glm::translate(model, waypoints[i]);
-				model = glm::scale(model, glm::vec3(0.1f));
-				lampShader.setMat4("model", model);
-
-				glDrawArrays(GL_TRIANGLES, 0, 36);
-			}*/
-
 			// Visualize curve
 			bool visualize = false;
 			glm::vec3 pos;
@@ -396,6 +352,13 @@ int main()
 			if (t >= 1.0f) {
 				t = 0.0f;
 				currentWaypoint++;
+			}
+
+			if (currentWaypoint == waypoints.size() - 1) {
+				waypoints.clear();
+				orientations.clear();
+				gameMode = CREATE;
+				currentWaypoint = 0;
 			}
 		}
 
