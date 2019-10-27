@@ -48,6 +48,18 @@
     <None Include="materials.frag">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="debugQuad.vert">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="debugQuad.frag">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="shadowMappingDepth.vert">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="shadowMappingDepth.frag">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader.h">

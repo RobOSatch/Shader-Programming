@@ -1,22 +1,14 @@
 ﻿  EZG-1.cpp
 C:\Users\robar\source\repos\EZG-1\EZG-1\Shader.h(4,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 C:\Users\robar\source\repos\EZG-1\EZG-1\Mesh.h(88,1): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(223,22): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(250,56): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(251,60): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(258,56): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(259,60): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(266,56): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(267,60): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(274,56): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(275,60): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(356,18): warning C4305: 'initializing': truncation from 'double' to 'float'
-C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(327,14): warning C4101: 'pos': unreferenced local variable
-C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(490,11): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(491,11): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(495,16): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(496,16): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(498,10): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(499,10): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(510,28): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(183,22): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(284,18): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(255,14): warning C4101: 'pos': unreferenced local variable
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(547,11): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(548,11): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(552,16): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(553,16): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(555,10): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(556,10): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(567,28): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
   EZG-1.vcxproj -> C:\Users\robar\source\repos\EZG-1\x64\Debug\EZG-1.exe

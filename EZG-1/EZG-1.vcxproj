@@ -169,6 +169,8 @@
     <ClCompile Include="stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="debugQuad.frag" />
+    <None Include="debugQuad.vert" />
     <None Include="fragmentShader.frag" />
     <None Include="lampShader.frag" />
     <None Include="lampShader.vert" />
@@ -176,6 +178,8 @@
     <None Include="lightShader.vert" />
     <None Include="materials.frag" />
     <None Include="materials.vert" />
+    <None Include="shadowMappingDepth.frag" />
+    <None Include="shadowMappingDepth.vert" />
     <None Include="vertexShader.vert" />
   </ItemGroup>
   <ItemGroup>
