@@ -1,0 +1,8 @@
+﻿  Building Custom Rule C:/Users/robar/source/repos/EZG-1/EZG-1/assimp/tools/assimp_cmd/CMakeLists.txt
+  CompareDump.cpp
+  ImageExtractor.cpp
+  Main.cpp
+  WriteDumb.cpp
+  Info.cpp
+  Export.cpp
+  assimp_cmd.vcxproj -> C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\tools\assimp_cmd\Debug\assimpd.exe

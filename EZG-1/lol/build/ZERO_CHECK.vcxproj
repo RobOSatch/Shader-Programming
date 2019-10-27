@@ -1,0 +1,170 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{0ABBA953-D05E-31DD-9A60-4F776FBB2D94}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <Keyword>Win32Proj</Keyword>
+    <Platform>x64</Platform>
+    <ProjectName>ZERO_CHECK</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\include;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\include;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\code;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\.;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\contrib\zlib;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\contrib\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\include;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\include;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\code;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\.;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\contrib\zlib;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\contrib\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\include;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\include;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\code;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\.;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\contrib\zlib;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\contrib\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\include;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\include;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\code;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\.;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\contrib\zlib;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\contrib\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\CMakeFiles\aaa45edd74dafcd23112724dd22e50cb\generate.stamp.rule">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Checking Build System</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/robar/source/repos/EZG-1/EZG-1/assimp -BC:/Users/robar/source/repos/EZG-1/EZG-1/assimp/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/robar/source/repos/EZG-1/EZG-1/assimp/build/Assimp.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeParseArguments.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckFunctionExists.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckIncludeFileCXX.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckTypeSize.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindPkgConfig.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\WindowsPaths.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\CMakeLists.txt;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\assimp-config-version.cmake.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\assimp-config.cmake.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\assimp.pc.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\assimpTargets-debug.cmake.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\assimpTargets-release.cmake.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\assimpTargets.cmake.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\CMakeFiles\3.16.0-rc2\CMakeCCompiler.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\CMakeFiles\3.16.0-rc2\CMakeCXXCompiler.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\CMakeFiles\3.16.0-rc2\CMakeRCCompiler.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\CMakeFiles\3.16.0-rc2\CMakeSystem.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\cmake-modules\FindDirectX.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\cmake-modules\FindPkgMacros.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\cmake-modules\FindRT.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\cmake-modules\FindZLIB.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\cmake-modules\PrecompiledHeader.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\cmake-modules\cmake_uninstall.cmake.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\cmake\HunterGate.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\code\CMakeLists.txt;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\contrib\CMakeLists.txt;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\contrib\irrXML\CMakeLists.txt;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\contrib\zlib\CMakeLists.txt;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\contrib\zlib\zconf.h.cmakein;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\contrib\zlib\zlib.pc.cmakein;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\include\assimp\config.h.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\revision.h.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\test\CMakeLists.txt;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\test\headercheck\CMakeLists.txt;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\tools\assimp_cmd\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\CMakeFiles\generate.stamp;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\contrib\zlib\CMakeFiles\generate.stamp;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\contrib\CMakeFiles\generate.stamp;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\contrib\irrXML\CMakeFiles\generate.stamp;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\code\CMakeFiles\generate.stamp;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\tools\assimp_cmd\CMakeFiles\generate.stamp;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\test\CMakeFiles\generate.stamp;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\test\headercheck\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Checking Build System</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/robar/source/repos/EZG-1/EZG-1/assimp -BC:/Users/robar/source/repos/EZG-1/EZG-1/assimp/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/robar/source/repos/EZG-1/EZG-1/assimp/build/Assimp.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeParseArguments.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckFunctionExists.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckIncludeFileCXX.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckTypeSize.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindPkgConfig.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\WindowsPaths.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\CMakeLists.txt;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\assimp-config-version.cmake.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\assimp-config.cmake.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\assimp.pc.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\assimpTargets-debug.cmake.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\assimpTargets-release.cmake.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\assimpTargets.cmake.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\CMakeFiles\3.16.0-rc2\CMakeCCompiler.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\CMakeFiles\3.16.0-rc2\CMakeCXXCompiler.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\CMakeFiles\3.16.0-rc2\CMakeRCCompiler.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\CMakeFiles\3.16.0-rc2\CMakeSystem.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\cmake-modules\FindDirectX.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\cmake-modules\FindPkgMacros.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\cmake-modules\FindRT.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\cmake-modules\FindZLIB.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\cmake-modules\PrecompiledHeader.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\cmake-modules\cmake_uninstall.cmake.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\cmake\HunterGate.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\code\CMakeLists.txt;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\contrib\CMakeLists.txt;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\contrib\irrXML\CMakeLists.txt;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\contrib\zlib\CMakeLists.txt;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\contrib\zlib\zconf.h.cmakein;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\contrib\zlib\zlib.pc.cmakein;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\include\assimp\config.h.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\revision.h.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\test\CMakeLists.txt;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\test\headercheck\CMakeLists.txt;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\tools\assimp_cmd\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\CMakeFiles\generate.stamp;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\contrib\zlib\CMakeFiles\generate.stamp;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\contrib\CMakeFiles\generate.stamp;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\contrib\irrXML\CMakeFiles\generate.stamp;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\code\CMakeFiles\generate.stamp;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\tools\assimp_cmd\CMakeFiles\generate.stamp;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\test\CMakeFiles\generate.stamp;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\test\headercheck\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Checking Build System</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/robar/source/repos/EZG-1/EZG-1/assimp -BC:/Users/robar/source/repos/EZG-1/EZG-1/assimp/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/robar/source/repos/EZG-1/EZG-1/assimp/build/Assimp.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeParseArguments.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckFunctionExists.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckIncludeFileCXX.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckTypeSize.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindPkgConfig.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\WindowsPaths.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\CMakeLists.txt;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\assimp-config-version.cmake.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\assimp-config.cmake.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\assimp.pc.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\assimpTargets-debug.cmake.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\assimpTargets-release.cmake.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\assimpTargets.cmake.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\CMakeFiles\3.16.0-rc2\CMakeCCompiler.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\CMakeFiles\3.16.0-rc2\CMakeCXXCompiler.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\CMakeFiles\3.16.0-rc2\CMakeRCCompiler.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\CMakeFiles\3.16.0-rc2\CMakeSystem.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\cmake-modules\FindDirectX.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\cmake-modules\FindPkgMacros.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\cmake-modules\FindRT.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\cmake-modules\FindZLIB.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\cmake-modules\PrecompiledHeader.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\cmake-modules\cmake_uninstall.cmake.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\cmake\HunterGate.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\code\CMakeLists.txt;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\contrib\CMakeLists.txt;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\contrib\irrXML\CMakeLists.txt;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\contrib\zlib\CMakeLists.txt;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\contrib\zlib\zconf.h.cmakein;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\contrib\zlib\zlib.pc.cmakein;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\include\assimp\config.h.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\revision.h.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\test\CMakeLists.txt;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\test\headercheck\CMakeLists.txt;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\tools\assimp_cmd\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\CMakeFiles\generate.stamp;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\contrib\zlib\CMakeFiles\generate.stamp;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\contrib\CMakeFiles\generate.stamp;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\contrib\irrXML\CMakeFiles\generate.stamp;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\code\CMakeFiles\generate.stamp;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\tools\assimp_cmd\CMakeFiles\generate.stamp;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\test\CMakeFiles\generate.stamp;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\test\headercheck\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Checking Build System</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/robar/source/repos/EZG-1/EZG-1/assimp -BC:/Users/robar/source/repos/EZG-1/EZG-1/assimp/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/robar/source/repos/EZG-1/EZG-1/assimp/build/Assimp.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeParseArguments.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckFunctionExists.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckIncludeFileCXX.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckTypeSize.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindPkgConfig.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\WindowsPaths.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\CMakeLists.txt;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\assimp-config-version.cmake.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\assimp-config.cmake.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\assimp.pc.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\assimpTargets-debug.cmake.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\assimpTargets-release.cmake.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\assimpTargets.cmake.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\CMakeFiles\3.16.0-rc2\CMakeCCompiler.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\CMakeFiles\3.16.0-rc2\CMakeCXXCompiler.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\CMakeFiles\3.16.0-rc2\CMakeRCCompiler.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\CMakeFiles\3.16.0-rc2\CMakeSystem.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\cmake-modules\FindDirectX.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\cmake-modules\FindPkgMacros.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\cmake-modules\FindRT.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\cmake-modules\FindZLIB.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\cmake-modules\PrecompiledHeader.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\cmake-modules\cmake_uninstall.cmake.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\cmake\HunterGate.cmake;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\code\CMakeLists.txt;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\contrib\CMakeLists.txt;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\contrib\irrXML\CMakeLists.txt;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\contrib\zlib\CMakeLists.txt;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\contrib\zlib\zconf.h.cmakein;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\contrib\zlib\zlib.pc.cmakein;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\include\assimp\config.h.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\revision.h.in;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\test\CMakeLists.txt;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\test\headercheck\CMakeLists.txt;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\tools\assimp_cmd\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\CMakeFiles\generate.stamp;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\contrib\zlib\CMakeFiles\generate.stamp;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\contrib\CMakeFiles\generate.stamp;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\contrib\irrXML\CMakeFiles\generate.stamp;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\code\CMakeFiles\generate.stamp;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\tools\assimp_cmd\CMakeFiles\generate.stamp;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\test\CMakeFiles\generate.stamp;C:\Users\robar\source\repos\EZG-1\EZG-1\assimp\build\test\headercheck\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

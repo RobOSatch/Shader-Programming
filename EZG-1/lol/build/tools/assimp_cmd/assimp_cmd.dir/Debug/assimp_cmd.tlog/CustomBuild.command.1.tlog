@@ -1,0 +1,10 @@
+^C:\USERS\ROBAR\SOURCE\REPOS\EZG-1\EZG-1\ASSIMP\TOOLS\ASSIMP_CMD\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/robar/source/repos/EZG-1/EZG-1/assimp -BC:/Users/robar/source/repos/EZG-1/EZG-1/assimp/build --check-stamp-file C:/Users/robar/source/repos/EZG-1/EZG-1/assimp/build/tools/assimp_cmd/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
