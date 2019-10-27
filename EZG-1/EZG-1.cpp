@@ -38,7 +38,9 @@ bool firstMouse = true;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
-float speed = 0.13f;
+float speed = 0.11f;
+
+bool visualize = false;
 
 // lighting
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
@@ -281,9 +283,8 @@ int main()
 
 		if (gameMode == RIDE) {
 			// Visualize curve
-			bool visualize = false;
 			glm::vec3 pos;
-			if (visualize) {
+			/*if (visualize) {
 				for (int i = 0; i < waypoints.size() - 1; i++) {
 					for (float p = 0.0f; p <= 1.0f; p += 0.01f) {
 						if (i == 0) {
@@ -305,7 +306,7 @@ int main()
 						glDrawArrays(GL_TRIANGLES, 0, 36);
 					}
 				}
-			}
+			}*/
 
 			// Draw splines
 			glm::vec3 nextPosition;
@@ -387,23 +388,25 @@ void processInput(GLFWwindow * window)
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
 
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		camera.ProcessKeyboard(FORWARD, deltaTime);
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		camera.ProcessKeyboard(BACKWARD, deltaTime);
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		camera.ProcessKeyboard(LEFT, deltaTime);
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		camera.ProcessKeyboard(RIGHT, deltaTime);
-	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-		camera.ProcessKeyboard(UP, deltaTime);
-	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-		camera.ProcessKeyboard(DOWN, deltaTime);
+	if (gameMode == CREATE) {
+		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+			camera.ProcessKeyboard(FORWARD, deltaTime);
+		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+			camera.ProcessKeyboard(BACKWARD, deltaTime);
+		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+			camera.ProcessKeyboard(LEFT, deltaTime);
+		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+			camera.ProcessKeyboard(RIGHT, deltaTime);
+		if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+			camera.ProcessKeyboard(UP, deltaTime);
+		if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+			camera.ProcessKeyboard(DOWN, deltaTime);
+	}
 
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-		speed = fmin(0.5f, speed + 0.001f);
+		speed = fmin(0.5f, speed + 0.0001f);
 	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-		speed = fmax(0.0f, speed - 0.001f);
+		speed = fmax(0.0f, speed - 0.0001f);
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -412,6 +415,10 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		gameMode = RIDE;
 		camera.Position = waypoints[0];
 		camera.Orientation = orientations[0];
+	}
+
+	if (key == GLFW_KEY_V && action == GLFW_PRESS) {
+		visualize = !visualize;
 	}
 }
 
@@ -450,7 +457,9 @@ void mouse_callback(GLFWwindow * window, double xpos, double ypos)
 	lastX = xpos;
 	lastY = ypos;
 
-	camera.ProcessMouseMovement(xoffset, yoffset);
+	if (gameMode == CREATE) {
+		camera.ProcessMouseMovement(xoffset, yoffset);
+	}
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
