@@ -57,7 +57,6 @@ void main()
 	normal = normalize(normal * 2.0 - 1.0);
 	normal.xy *= bumpiness;
     normal = normalize(normal);
-	//vec3 shadowNormal = normalize(fs_in.Normal);
 
     vec3 color = texture(diffuseTexture, fs_in.TexCoords).rgb;
         

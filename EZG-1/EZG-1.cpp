@@ -150,8 +150,8 @@ int main()
 	wallTexture = loadTexture("resources/textures/brickwall.jpg");
 	normalMap = loadTexture("resources/textures/brickwall_normal.jpg");
 	
-	secondTexture = loadTexture("resources/textures/marmor.jpg");
-	secondNormalMap = loadTexture("resources/textures/marmor_normal.jpg");
+	secondTexture = loadTexture("resources/textures/metalTex.jpg");
+	secondNormalMap = loadTexture("resources/textures/metalNormal.jpg");
 
 	// configure depth map FBO
 	// -----------------------
@@ -373,7 +373,7 @@ void renderScene(const Shader& shader)
 	model = glm::mat4(1.0f);
 	model = glm::translate(model, glm::vec3(6.0, 2.0f, 6.0));
 	model = glm::rotate(model, glm::radians(60.0f), glm::normalize(glm::vec3(1.0, 0.0, 1.0)));
-	model = glm::scale(model, glm::vec3(0.3f));
+	model = glm::scale(model, glm::vec3(0.75f));
 	shader.setMat4("model", model);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, secondTexture);
@@ -381,29 +381,6 @@ void renderScene(const Shader& shader)
 	glBindTexture(GL_TEXTURE_2D, secondNormalMap);
 	glActiveTexture(GL_TEXTURE2);
 	cube->Draw(shader);
-
-	// floor
-	/*model = glm::mat4(1.0f);
-	shader.setMat4("model", model);
-	glBindVertexArray(planeVAO);
-	glDrawArrays(GL_TRIANGLES, 0, 6);*/
-	// cubes
-	/*model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(0.0f, 1.5f, 0.0));
-	model = glm::scale(model, glm::vec3(0.5f));
-	shader.setMat4("model", model);
-	renderCube();
-	model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(2.0f, 0.0f, 1.0));
-	model = glm::scale(model, glm::vec3(0.5f));
-	shader.setMat4("model", model);
-	renderCube();
-	model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(-1.0f, 0.0f, 2.0));
-	model = glm::rotate(model, glm::radians(60.0f), glm::normalize(glm::vec3(1.0, 0.0, 1.0)));
-	model = glm::scale(model, glm::vec3(0.25));
-	shader.setMat4("model", model);
-	renderCube();*/
 }
 
 
