@@ -76,7 +76,8 @@ int previousSamples = 4;
 bool msaa = true;
 bool shouldQuit = false;
 glm::vec2 mousePos = glm::vec2(0.0f, 0.0f);
-int AA_MODE = 0;
+int AAMode = 0;
+int previousAAMode = 0;
 
 int main()
 {
@@ -89,6 +90,13 @@ int main()
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 		glfwWindowHint(GLFW_SAMPLES, samples);
+
+		switch (AAMode) {
+		case 0:
+			glfwWindowHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+		case 1:
+			glfwWindowHint(GL_LINE_SMOOTH_HINT, GL_FASTEST);
+		}
 
 		// glfw window creation
 		// --------------------
@@ -209,8 +217,9 @@ int main()
 			if (msaa) glEnable(GL_MULTISAMPLE);
 			else glDisable(GL_MULTISAMPLE);
 
-			if (previousSamples != samples) {
+			if ((previousSamples != samples) || (previousAAMode != AAMode)) {
 				previousSamples = samples;
+				previousAAMode = AAMode;
 				firstMouse = true;
 				glfwTerminate();
 				break;
@@ -658,6 +667,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	if (key == GLFW_KEY_V && action == GLFW_PRESS) {
 		visualize = !visualize;
 	}
+
+	if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS)
+		AAMode = min(1, AAMode + 1);
+	if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS)
+		AAMode = max(0, AAMode - 1);
 
 	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
 		samples += 4;
