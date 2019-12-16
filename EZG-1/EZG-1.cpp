@@ -70,275 +70,301 @@ glm::vec3 lightPos(0.0f, 5.0f, 6.0f);
 
 float bumpiness = 1.0f;
 
+// MSAA
+int samples = 4;
+int previousSamples = 4;
+bool msaa = true;
+bool shouldQuit = false;
+glm::vec2 mousePos = glm::vec2(0.0f, 0.0f);
+int AA_MODE = 0;
+
 int main()
 {
-	// glfw: initialize and configure
-	// ------------------------------
-	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	while (!shouldQuit) {
 
-	// glfw window creation
-	// --------------------
-	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Camera Ride", NULL, NULL);
-	if (window == NULL)
-	{
-		std::cout << "Failed to create GLFW window" << std::endl;
-		glfwTerminate();
-		return -1;
-	}
-	glfwMakeContextCurrent(window);
-	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-	glfwSetCursorPosCallback(window, mouse_callback);
-	glfwSetScrollCallback(window, scroll_callback);
-	glfwSetKeyCallback(window, key_callback);
-	glfwSetMouseButtonCallback(window, mouse_button_callback);
+		// glfw: initialize and configure
+		// ------------------------------
+		glfwInit();
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+		glfwWindowHint(GLFW_SAMPLES, samples);
 
-	// tell GLFW to capture our mouse
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		// glfw window creation
+		// --------------------
+		GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Camera Ride", NULL, NULL);
+		if (window == NULL)
+		{
+			std::cout << "Failed to create GLFW window" << std::endl;
+			glfwTerminate();
+			return -1;
+		}
+		glfwMakeContextCurrent(window);
+		glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+		glfwSetCursorPosCallback(window, mouse_callback);
+		glfwSetScrollCallback(window, scroll_callback);
+		glfwSetKeyCallback(window, key_callback);
+		glfwSetMouseButtonCallback(window, mouse_button_callback);
 
-	// glad: load all OpenGL function pointers
-	// ---------------------------------------
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-	{
-		std::cout << "Failed to initialize GLAD" << std::endl;
-		return -1;
-	}
+		// tell GLFW to capture our mouse
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-	// configure global opengl state
-	// -----------------------------
-	glEnable(GL_DEPTH_TEST);
-
-	// build and compile shaders
-   // -------------------------
-	Shader shader("lightShader.vert", "lightShader.frag");
-	Shader depthShader("shadowMappingDepth.vert", "shadowMappingDepth.frag");
-
-	// set up vertex data (and buffer(s)) and configure vertex attributes
-	// ------------------------------------------------------------------
-	float planeVertices[] = {
-		// positions            // normals         // texcoords
-		 25.0f, -0.5f,  25.0f,  0.0f, 1.0f, 0.0f,  25.0f,  0.0f,
-		-25.0f, -0.5f,  25.0f,  0.0f, 1.0f, 0.0f,   0.0f,  0.0f,
-		-25.0f, -0.5f, -25.0f,  0.0f, 1.0f, 0.0f,   0.0f, 25.0f,
-
-		 25.0f, -0.5f,  25.0f,  0.0f, 1.0f, 0.0f,  25.0f,  0.0f,
-		-25.0f, -0.5f, -25.0f,  0.0f, 1.0f, 0.0f,   0.0f, 25.0f,
-		 25.0f, -0.5f, -25.0f,  0.0f, 1.0f, 0.0f,  25.0f, 10.0f
-	};
-
-	// plane VAO
-	unsigned int planeVBO;
-	glGenVertexArrays(1, &planeVAO);
-	glGenBuffers(1, &planeVBO);
-	glBindVertexArray(planeVAO);
-	glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), planeVertices, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-	glBindVertexArray(0);
-
-	// load textures
-	// -------------
-	unsigned int woodTexture = loadTexture("resources/textures/wood.png");
-	boxTexture = loadTexture("resources/textures/container2.png");
-	wallTexture = loadTexture("resources/textures/brickwall.jpg");
-	normalMap = loadTexture("resources/textures/brickwall_normal.jpg");
-	
-	secondTexture = loadTexture("resources/textures/metalTex.jpg");
-	secondNormalMap = loadTexture("resources/textures/metalNormal.jpg");
-
-	// configure depth map FBO
-	// -----------------------
-	const unsigned int SHADOW_WIDTH = 8192, SHADOW_HEIGHT = 8192;
-	unsigned int depthMapFBO;
-	glGenFramebuffers(1, &depthMapFBO);
-	// create depth texture
-	unsigned int depthMap;
-	glGenTextures(1, &depthMap);
-	glBindTexture(GL_TEXTURE_2D, depthMap);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	float borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
-	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-	// attach depth texture as FBO's depth buffer
-	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
-	glDrawBuffer(GL_NONE);
-	glReadBuffer(GL_NONE);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	shader.use();
-	shader.setInt("diffuseTexture", 0);
-	shader.setInt("normalMap", 1);
-	shader.setInt("shadowMap", 2);
-
-	std::vector<glm::vec3> curvePoints;
-
-	// Model stuff
-	cube = new Model("resources/objects/cube/cube.obj");
-
-	int currentWaypoint = 0;
-	float t = 0.0f;
-	// render loop
-	// -----------
-	while (!glfwWindowShouldClose(window))
-	{
-		float currentFrame = glfwGetTime();
-		deltaTime = currentFrame - lastFrame;
-		lastFrame = currentFrame;
-
-		processInput(window);
-
-		// render
-		// ------
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		// render to depth map
-		glm::mat4 lightProjection, lightView;
-		glm::mat4 lightSpaceMatrix;
-		float near_plane = 1.0f, far_plane = 7.5f;
-		lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-		lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
-		lightSpaceMatrix = lightProjection * lightView;
-		depthShader.use();
-		depthShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
-
-		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-		glClear(GL_DEPTH_BUFFER_BIT);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, wallTexture);
-		renderScene(depthShader);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		// reset viewport
-		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		// 2. render scene as normal using the generated depth/shadow map  
-		// --------------------------------------------------------------
-		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		shader.use();
-		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-		glm::mat4 view = camera.GetViewMatrix();
-		shader.setMat4("projection", projection);
-		shader.setMat4("view", view);
-		// set light uniforms
-		shader.setVec3("viewPos", camera.Position);
-		shader.setVec3("lightPos", lightPos);
-		shader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
-		shader.setFloat("bumpiness", bumpiness);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, wallTexture);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, normalMap);
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, depthMap);
-		
-		renderScene(shader);
-
-		if (gameMode == RIDE) {
-			// Visualize curve
-			glm::vec3 pos;
-			/*if (visualize) {
-				for (int i = 0; i < waypoints.size() - 1; i++) {
-					for (float p = 0.0f; p <= 1.0f; p += 0.01f) {
-						if (i == 0) {
-							pos = interpolation::catmullRomSpline(waypoints[i], waypoints[i], waypoints[i + 1], waypoints[i + 2], p);
-						}
-						else if (i == waypoints.size() - 2) {
-							pos = interpolation::catmullRomSpline(waypoints[i - 1], waypoints[i], waypoints[i + 1], waypoints[i + 1], p);
-						}
-						else {
-							pos = interpolation::catmullRomSpline(waypoints[i - 1], waypoints[i], waypoints[i + 1], waypoints[i + 2], p);
-						}
-
-						pos.y -= 0.1f;
-						model = glm::mat4(1.0f);
-						model = glm::translate(model, pos);
-						model = glm::scale(model, glm::vec3(0.05f));
-						lampShader.setMat4("model", model);
-
-						glDrawArrays(GL_TRIANGLES, 0, 36);
-					}
-				}
-			}*/
-
-			// Draw splines
-			glm::vec3 nextPosition;
-			glm::quat nextOrientation;
-			if (t <= 1.0f && currentWaypoint != waypoints.size() - 1) {
-				float e = 0.1;
-				bool done = false;
-
-				while (!done) {
-					if (currentWaypoint == 0) {
-						nextPosition = interpolation::catmullRomSpline(waypoints[currentWaypoint], waypoints[currentWaypoint], waypoints[currentWaypoint + 1], waypoints[currentWaypoint + 2], t);
-						nextOrientation = interpolation::squad(orientations[currentWaypoint], orientations[currentWaypoint], orientations[currentWaypoint + 1], orientations[currentWaypoint + 2], t);
-					}
-					else if (currentWaypoint == waypoints.size() - 2) {
-						nextPosition = interpolation::catmullRomSpline(waypoints[currentWaypoint - 1], waypoints[currentWaypoint], waypoints[currentWaypoint + 1], waypoints[currentWaypoint + 1], t);
-						nextOrientation = interpolation::squad(orientations[currentWaypoint - 1], orientations[currentWaypoint], orientations[currentWaypoint + 1], orientations[currentWaypoint + 1], t);
-					}
-					else {
-						nextPosition = interpolation::catmullRomSpline(waypoints[currentWaypoint - 1], waypoints[currentWaypoint], waypoints[currentWaypoint + 1], waypoints[currentWaypoint + 2], t);
-						nextOrientation = interpolation::squad(orientations[currentWaypoint - 1], orientations[currentWaypoint], orientations[currentWaypoint + 1], orientations[currentWaypoint + 2], t);
-					}
-
-					glm::vec3 direction = nextPosition - camera.Position;
-					float distance = glm::length(direction);
-
-					if (distance <= speed + 0.1 && distance >= speed - 0.1) {
-						done = true;
-						camera.Position = nextPosition;
-						camera.Orientation = nextOrientation;
-
-						// SLERP
-						//camera.Orientation = glm::slerp(firstQuat, secondQuat, t);
-					}
-
-					t += e * deltaTime * speed;
-
-					if (distance >= 5.0f) {
-						camera.Position = nextPosition;
-						done = true;
-					}
-				}
-			}
-
-			if (t >= 1.0f) {
-				t = 0.0f;
-				currentWaypoint++;
-			}
-
-			if (currentWaypoint == waypoints.size() - 1) {
-				waypoints.clear();
-				orientations.clear();
-				gameMode = CREATE;
-				currentWaypoint = 0;
-			}
+		// glad: load all OpenGL function pointers
+		// ---------------------------------------
+		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+		{
+			std::cout << "Failed to initialize GLAD" << std::endl;
+			return -1;
 		}
 
-		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-		// -------------------------------------------------------------------------------
-		glfwSwapBuffers(window);
-		glfwPollEvents();
+		//glfwWindowHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+
+		// configure global opengl state
+		// -----------------------------
+		glEnable(GL_DEPTH_TEST);
+
+		// build and compile shaders
+	   // -------------------------
+		Shader shader("lightShader.vert", "lightShader.frag");
+		Shader depthShader("shadowMappingDepth.vert", "shadowMappingDepth.frag");
+
+		// set up vertex data (and buffer(s)) and configure vertex attributes
+		// ------------------------------------------------------------------
+		float planeVertices[] = {
+			// positions            // normals         // texcoords
+			 25.0f, -0.5f,  25.0f,  0.0f, 1.0f, 0.0f,  25.0f,  0.0f,
+			-25.0f, -0.5f,  25.0f,  0.0f, 1.0f, 0.0f,   0.0f,  0.0f,
+			-25.0f, -0.5f, -25.0f,  0.0f, 1.0f, 0.0f,   0.0f, 25.0f,
+
+			 25.0f, -0.5f,  25.0f,  0.0f, 1.0f, 0.0f,  25.0f,  0.0f,
+			-25.0f, -0.5f, -25.0f,  0.0f, 1.0f, 0.0f,   0.0f, 25.0f,
+			 25.0f, -0.5f, -25.0f,  0.0f, 1.0f, 0.0f,  25.0f, 10.0f
+		};
+
+		// plane VAO
+		unsigned int planeVBO;
+		glGenVertexArrays(1, &planeVAO);
+		glGenBuffers(1, &planeVBO);
+		glBindVertexArray(planeVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), planeVertices, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+		glBindVertexArray(0);
+
+		// load textures
+		// -------------
+		unsigned int woodTexture = loadTexture("resources/textures/wood.png");
+		boxTexture = loadTexture("resources/textures/container2.png");
+		wallTexture = loadTexture("resources/textures/brickwall.jpg");
+		normalMap = loadTexture("resources/textures/brickwall_normal.jpg");
+
+		secondTexture = loadTexture("resources/textures/metalTex.jpg");
+		secondNormalMap = loadTexture("resources/textures/metalNormal.jpg");
+
+		// configure depth map FBO
+		// -----------------------
+		const unsigned int SHADOW_WIDTH = 8192, SHADOW_HEIGHT = 8192;
+		unsigned int depthMapFBO;
+		glGenFramebuffers(1, &depthMapFBO);
+		// create depth texture
+		unsigned int depthMap;
+		glGenTextures(1, &depthMap);
+		glBindTexture(GL_TEXTURE_2D, depthMap);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+		float borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+		// attach depth texture as FBO's depth buffer
+		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+		glDrawBuffer(GL_NONE);
+		glReadBuffer(GL_NONE);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		shader.use();
+		shader.setInt("diffuseTexture", 0);
+		shader.setInt("normalMap", 1);
+		shader.setInt("shadowMap", 2);
+
+		std::vector<glm::vec3> curvePoints;
+
+		// Model stuff
+		cube = new Model("resources/objects/cube/cube.obj");
+
+		int currentWaypoint = 0;
+		float t = 0.0f;
+
+		// render loop
+		// -----------
+		while (!glfwWindowShouldClose(window))
+		{
+			if (msaa) glEnable(GL_MULTISAMPLE);
+			else glDisable(GL_MULTISAMPLE);
+
+			if (previousSamples != samples) {
+				previousSamples = samples;
+				firstMouse = true;
+				glfwTerminate();
+				break;
+			}
+
+			float currentFrame = glfwGetTime();
+			deltaTime = currentFrame - lastFrame;
+			lastFrame = currentFrame;
+
+			processInput(window);
+
+			// render
+			// ------
+			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			// render to depth map
+			glm::mat4 lightProjection, lightView;
+			glm::mat4 lightSpaceMatrix;
+			float near_plane = 1.0f, far_plane = 7.5f;
+			lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+			lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+			lightSpaceMatrix = lightProjection * lightView;
+			depthShader.use();
+			depthShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
+
+			glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+			glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+			glClear(GL_DEPTH_BUFFER_BIT);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, wallTexture);
+			renderScene(depthShader);
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+			// reset viewport
+			glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			// 2. render scene as normal using the generated depth/shadow map  
+			// --------------------------------------------------------------
+			glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			shader.use();
+			glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+			glm::mat4 view = camera.GetViewMatrix();
+			shader.setMat4("projection", projection);
+			shader.setMat4("view", view);
+			// set light uniforms
+			shader.setVec3("viewPos", camera.Position);
+			shader.setVec3("lightPos", lightPos);
+			shader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
+			shader.setFloat("bumpiness", bumpiness);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, wallTexture);
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, normalMap);
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, depthMap);
+
+			renderScene(shader);
+
+			if (gameMode == RIDE) {
+				// Visualize curve
+				glm::vec3 pos;
+				/*if (visualize) {
+					for (int i = 0; i < waypoints.size() - 1; i++) {
+						for (float p = 0.0f; p <= 1.0f; p += 0.01f) {
+							if (i == 0) {
+								pos = interpolation::catmullRomSpline(waypoints[i], waypoints[i], waypoints[i + 1], waypoints[i + 2], p);
+							}
+							else if (i == waypoints.size() - 2) {
+								pos = interpolation::catmullRomSpline(waypoints[i - 1], waypoints[i], waypoints[i + 1], waypoints[i + 1], p);
+							}
+							else {
+								pos = interpolation::catmullRomSpline(waypoints[i - 1], waypoints[i], waypoints[i + 1], waypoints[i + 2], p);
+							}
+
+							pos.y -= 0.1f;
+							model = glm::mat4(1.0f);
+							model = glm::translate(model, pos);
+							model = glm::scale(model, glm::vec3(0.05f));
+							lampShader.setMat4("model", model);
+
+							glDrawArrays(GL_TRIANGLES, 0, 36);
+						}
+					}
+				}*/
+
+				// Draw splines
+				glm::vec3 nextPosition;
+				glm::quat nextOrientation;
+				if (t <= 1.0f && currentWaypoint != waypoints.size() - 1) {
+					float e = 0.1;
+					bool done = false;
+
+					while (!done) {
+						if (currentWaypoint == 0) {
+							nextPosition = interpolation::catmullRomSpline(waypoints[currentWaypoint], waypoints[currentWaypoint], waypoints[currentWaypoint + 1], waypoints[currentWaypoint + 2], t);
+							nextOrientation = interpolation::squad(orientations[currentWaypoint], orientations[currentWaypoint], orientations[currentWaypoint + 1], orientations[currentWaypoint + 2], t);
+						}
+						else if (currentWaypoint == waypoints.size() - 2) {
+							nextPosition = interpolation::catmullRomSpline(waypoints[currentWaypoint - 1], waypoints[currentWaypoint], waypoints[currentWaypoint + 1], waypoints[currentWaypoint + 1], t);
+							nextOrientation = interpolation::squad(orientations[currentWaypoint - 1], orientations[currentWaypoint], orientations[currentWaypoint + 1], orientations[currentWaypoint + 1], t);
+						}
+						else {
+							nextPosition = interpolation::catmullRomSpline(waypoints[currentWaypoint - 1], waypoints[currentWaypoint], waypoints[currentWaypoint + 1], waypoints[currentWaypoint + 2], t);
+							nextOrientation = interpolation::squad(orientations[currentWaypoint - 1], orientations[currentWaypoint], orientations[currentWaypoint + 1], orientations[currentWaypoint + 2], t);
+						}
+
+						glm::vec3 direction = nextPosition - camera.Position;
+						float distance = glm::length(direction);
+
+						if (distance <= speed + 0.1 && distance >= speed - 0.1) {
+							done = true;
+							camera.Position = nextPosition;
+							camera.Orientation = nextOrientation;
+
+							// SLERP
+							//camera.Orientation = glm::slerp(firstQuat, secondQuat, t);
+						}
+
+						t += e * deltaTime * speed;
+
+						if (distance >= 5.0f) {
+							camera.Position = nextPosition;
+							done = true;
+						}
+					}
+				}
+
+				if (t >= 1.0f) {
+					t = 0.0f;
+					currentWaypoint++;
+				}
+
+				if (currentWaypoint == waypoints.size() - 1) {
+					waypoints.clear();
+					orientations.clear();
+					gameMode = CREATE;
+					currentWaypoint = 0;
+				}
+			}
+
+			// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+			// -------------------------------------------------------------------------------
+			glfwSwapBuffers(window);
+			glfwPollEvents();
+		}
+
+		// glfw: terminate, clearing all previously allocated GLFW resources.
+		// ------------------------------------------------------------------
+		glfwTerminate();
 	}
 
-	// glfw: terminate, clearing all previously allocated GLFW resources.
-	// ------------------------------------------------------------------
-	glfwTerminate();
 	return 0;
 }
 
@@ -590,8 +616,10 @@ void renderWalls()
 // ---------------------------------------------------------------------------------------------------------
 void processInput(GLFWwindow * window)
 {
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+		shouldQuit = true;
 		glfwSetWindowShouldClose(window, true);
+	}
 
 	if (gameMode == CREATE) {
 		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
@@ -630,6 +658,15 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	if (key == GLFW_KEY_V && action == GLFW_PRESS) {
 		visualize = !visualize;
 	}
+
+	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
+		samples += 4;
+	if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS)
+		samples = max(0, samples - 4);
+
+	if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
+		msaa = !msaa;
+	}
 }
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
@@ -659,6 +696,9 @@ void mouse_callback(GLFWwindow * window, double xpos, double ypos)
 		lastX = xpos;
 		lastY = ypos;
 		firstMouse = false;
+
+		xpos = mousePos.x;
+		ypos = mousePos.y;
 	}
 
 	float xoffset = xpos - lastX;
@@ -670,6 +710,8 @@ void mouse_callback(GLFWwindow * window, double xpos, double ypos)
 	if (gameMode == CREATE) {
 		camera.ProcessMouseMovement(xoffset, yoffset);
 	}
+
+	mousePos = glm::vec2(xpos, ypos);
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
