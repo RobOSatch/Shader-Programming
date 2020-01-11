@@ -166,7 +166,12 @@
   <ItemGroup>
     <ClCompile Include="EZG-1.cpp" />
     <ClCompile Include="glad.c" />
+    <ClCompile Include="KDNode.cpp" />
+    <ClCompile Include="KDTree.cpp" />
+    <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="SceneObject.cpp" />
     <ClCompile Include="stb_image.cpp" />
+    <ClCompile Include="Triangle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="debugQuad.frag" />
@@ -183,12 +188,18 @@
     <None Include="vertexShader.vert" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AABB.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="interpolation.h" />
+    <ClInclude Include="KDNode.h" />
+    <ClInclude Include="KDTree.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="Scene.h" />
+    <ClInclude Include="SceneObject.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="stb_image.h" />
+    <ClInclude Include="Triangle.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

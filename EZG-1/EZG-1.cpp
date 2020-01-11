@@ -10,8 +10,10 @@
 #include "Shader.h"
 #include "Camera.h"
 #include "Model.h"
+#include "Scene.h"
 
 #include "interpolation.h"
+#include "KDTree.h"
 
 #include <iostream>
 
@@ -47,7 +49,9 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 // meshes
+unsigned int VBO;
 unsigned int planeVAO;
+unsigned int lightVAO;
 
 float speed = 0.11f;
 
@@ -78,6 +82,42 @@ bool shouldQuit = false;
 glm::vec2 mousePos = glm::vec2(0.0f, 0.0f);
 int AAMode = 0;
 int previousAAMode = 0;
+
+Scene mainScene;
+bool isFirstRender = true;
+
+Shader *lämpShader;
+KDTree kdTree;
+
+void drawLineBox(glm::vec3 minP, glm::vec3 maxP, Shader *usingShader, glm::mat4 view, glm::mat4 proj, unsigned int lightVAO)
+{
+	glm::vec3 scale = maxP - minP;
+	usingShader->use();
+	glm::mat4 model = glm::mat4(1.0f);
+
+	model = glm::translate(model, minP + (scale * 0.5f));
+
+	model = glm::scale(model, scale);
+
+	usingShader->setMat4("projection", proj);
+	usingShader->setMat4("view", view);
+	usingShader->setMat4("model", model);
+
+	glBindVertexArray(lightVAO);
+	glDrawArrays(GL_LINES, 0, 42);
+}
+
+void drawKDTree(KDNode* node, glm::mat4 view, glm::mat4 projection)
+{
+	if (node->left == nullptr && node->right == nullptr) {
+		drawLineBox(node->aabb->mMinPoint, node->aabb->mMaxPoint, lämpShader, view, projection, lightVAO);
+		return;
+	}
+
+	drawKDTree(node->left, view, projection);
+	drawKDTree(node->right, view, projection);
+	return;
+}
 
 int main()
 {
@@ -135,6 +175,61 @@ int main()
 	   // -------------------------
 		Shader shader("lightShader.vert", "lightShader.frag");
 		Shader depthShader("shadowMappingDepth.vert", "shadowMappingDepth.frag");
+		lämpShader = new Shader("lampShader.vert", "lampShader.frag");
+
+		float vertices[] = {
+	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0.0f,  0.0f, -1.0f,
+	 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,  0.0f,  0.0f, -1.0f,
+	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  0.0f,  0.0f, -1.0f,
+	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  0.0f,  0.0f, -1.0f,
+	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  0.0f, -1.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0.0f,  0.0f, -1.0f,
+
+	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  0.0f,  0.0f, 1.0f,
+	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,  0.0f,  0.0f, 1.0f,
+	 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,  0.0f,  0.0f, 1.0f,
+	 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,  0.0f,  0.0f, 1.0f,
+	-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,  0.0f,  0.0f, 1.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  0.0f,  0.0f, 1.0f,
+
+	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  -1.0f,  0.0f,  0.0f,
+	-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  -1.0f,  0.0f,  0.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  -1.0f,  0.0f,  0.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  -1.0f,  0.0f,  0.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  -1.0f,  0.0f,  0.0f,
+	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  -1.0f,  0.0f,  0.0f,
+
+	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  1.0f,  0.0f,  0.0f,
+	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  1.0f,  0.0f,  0.0f,
+	 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  1.0f,  0.0f,  0.0f,
+	 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  1.0f,  0.0f,  0.0f,
+	 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  1.0f,  0.0f,  0.0f,
+	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  1.0f,  0.0f,  0.0f,
+
+	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  0.0f, -1.0f,  0.0f,
+	 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,  0.0f, -1.0f,  0.0f,
+	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,  0.0f, -1.0f,  0.0f,
+	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,  0.0f, -1.0f,  0.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  0.0f, -1.0f,  0.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  0.0f, -1.0f,  0.0f,
+
+	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  1.0f,  0.0f,
+	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  0.0f,  1.0f,  0.0f,
+	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  0.0f,  1.0f,  0.0f,
+	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  0.0f,  1.0f,  0.0f,
+	-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,  0.0f,  1.0f,  0.0f,
+	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  1.0f,  0.0f,
+
+
+	//For Lines
+	 0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0.0f,  0.0f, -1.0f,
+	 0.5f, -0.5f, 0.5f,  1.0f, 0.0f,  0.0f,  0.0f, -1.0f,
+	 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  0.0f, -1.0f,
+	 0.5f,  0.5f, -0.5f,  0.0f, 0.0f,  0.0f,  0.0f, -1.0f,
+	-0.5f,  0.5f, 0.5f,  0.0f, 1.0f,  0.0f,  0.0f, -1.0f,
+	 0.5f,  0.5f, 0.5f,  0.0f, 0.0f,  0.0f,  0.0f, -1.0f,
+
+		};
 
 		// set up vertex data (and buffer(s)) and configure vertex attributes
 		// ------------------------------------------------------------------
@@ -163,6 +258,24 @@ int main()
 		glEnableVertexAttribArray(2);
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 		glBindVertexArray(0);
+
+		//light
+		glGenBuffers(1, &VBO);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+		glGenVertexArrays(1, &lightVAO);
+		glBindVertexArray(lightVAO);
+
+		// we only need to bind to the VBO (to link it with glVertexAttribPointer), no need to fill it; the VBO's data already contains all we need (it's already bound, but we do it again for educational purposes)
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5 * sizeof(float)));
+		glEnableVertexAttribArray(2);
 
 		// load textures
 		// -------------
@@ -281,6 +394,22 @@ int main()
 
 			renderScene(shader);
 
+			// KD-Tree
+			if (isFirstRender) {
+				kdTree = KDTree(&mainScene);
+				kdTree.construct(kdTree.root, 0);
+			}
+
+			drawKDTree(kdTree.root, view, projection);
+
+			isFirstRender = false;
+
+			/*vector<AABB> allAABB = mainScene.getAllAABB();
+			for (AABB bb : allAABB)
+			{
+				drawLineBox(bb.mMinPoint, bb.mMaxPoint, lämpShader, view, projection, lightVAO);
+			}*/
+
 			if (gameMode == RIDE) {
 				// Visualize curve
 				glm::vec3 pos;
@@ -392,6 +521,8 @@ void renderScene(const Shader& shader)
 			model = glm::mat4(1.0f);
 			model = glm::translate(model, glm::vec3(2.0f * i, -1.5f, 2.0f * j));
 			shader.setMat4("model", model);
+
+			if (isFirstRender) mainScene.addSceneObject(cube, model, 1, nullptr);
 			cube->Draw(shader);
 
 			if ((i == 1 && j == 1) || (i == 9 && j == 9) || (i == 1 && j == 9) || (i == 9 && j == 1)) {
@@ -399,6 +530,8 @@ void renderScene(const Shader& shader)
 					model = glm::mat4(1.0f);
 					model = glm::translate(model, glm::vec3(2.0f * i, -1.5f + 2.0f * k, 2.0f * j));
 					shader.setMat4("model", model);
+					
+					if (isFirstRender) mainScene.addSceneObject(cube, model, 1, nullptr);
 					cube->Draw(shader);
 				}
 			}
@@ -415,6 +548,8 @@ void renderScene(const Shader& shader)
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, secondNormalMap);
 	glActiveTexture(GL_TEXTURE2);
+
+	if (isFirstRender) mainScene.addSceneObject(cube, model, 1, nullptr);
 	cube->Draw(shader);
 }
 

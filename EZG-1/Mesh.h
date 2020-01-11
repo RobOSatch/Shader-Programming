@@ -28,6 +28,12 @@ struct Vertex {
 	glm::vec3 Bitangent;
 };
 
+struct Triangle {
+	Vertex a;
+	Vertex b;
+	Vertex c;
+};
+
 struct Texture {
 	unsigned int id;
 	string type;
