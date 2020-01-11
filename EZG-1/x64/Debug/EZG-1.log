@@ -2,14 +2,14 @@
 C:\Users\robar\source\repos\EZG-1\EZG-1\Shader.h(4,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 C:\Users\robar\source\repos\EZG-1\EZG-1\Mesh.h(94,1): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
 C:\Users\robar\source\repos\EZG-1\EZG-1\KDTree.h(2,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(344,23): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(447,19): warning C4305: 'initializing': truncation from 'double' to 'float'
-C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(418,15): warning C4101: 'pos': unreferenced local variable
-C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(848,11): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(849,11): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(856,16): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(857,16): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(859,10): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(860,10): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(873,28): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(346,23): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(451,19): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(422,15): warning C4101: 'pos': unreferenced local variable
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(852,11): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(853,11): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(860,16): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(861,16): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(863,10): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(864,10): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(877,28): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
   EZG-1.vcxproj -> C:\Users\robar\source\repos\EZG-1\x64\Debug\EZG-1.exe
