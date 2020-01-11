@@ -109,8 +109,11 @@ void drawLineBox(glm::vec3 minP, glm::vec3 maxP, Shader *usingShader, glm::mat4 
 
 void drawKDTree(KDNode* node, glm::mat4 view, glm::mat4 projection)
 {
+	if (node->aabb == nullptr) return;
+
+	drawLineBox(node->aabb->mMinPoint, node->aabb->mMaxPoint, lämpShader, view, projection, lightVAO);
+
 	if (node->left == nullptr && node->right == nullptr) {
-		drawLineBox(node->aabb->mMinPoint, node->aabb->mMaxPoint, lämpShader, view, projection, lightVAO);
 		return;
 	}
 

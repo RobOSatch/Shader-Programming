@@ -8,6 +8,7 @@ KDNode::KDNode(vector<Vertex> vertices)
 
 void KDNode::getNodeAABB()
 {
+	if (vertices.size() == 0) return;
 	AABB* bb = new AABB(vertices[0].Position, vertices[0].Position);
 
 	for (Vertex v : vertices) {

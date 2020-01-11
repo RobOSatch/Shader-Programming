@@ -24,8 +24,14 @@ void KDTree::construct(KDNode* node, int depth)
 	KDNode* left = new KDNode(split.leftSplit);
 	KDNode* right = new KDNode(split.rightSplit);
 
+	std::cout << left->vertices.size() << " | ";
+	std::cout << right->vertices.size() << std::endl;
+
 	++depth;
 	node->left = left;
 	node->right = right;
+	construct(left, depth);
+	construct(right, depth);
+
 	return;
 }
