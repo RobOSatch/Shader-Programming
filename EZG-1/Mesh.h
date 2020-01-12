@@ -15,6 +15,8 @@
 #include <vector>
 using namespace std;
 
+struct Triangle;
+
 struct Vertex {
 	// position
 	glm::vec3 Position;
@@ -26,12 +28,14 @@ struct Vertex {
 	glm::vec3 Tangent;
 	// bitangent
 	glm::vec3 Bitangent;
+	// triangel
+	vector<Triangle*> triangles;
 };
 
-struct Triangle {
-	Vertex a;
-	Vertex b;
-	Vertex c;
+
+struct Triangle
+{
+	vector<int> indices;
 };
 
 struct Texture {
@@ -46,15 +50,17 @@ public:
 	vector<Vertex> vertices;
 	vector<unsigned int> indices;
 	vector<Texture> textures;
+	vector<Triangle*> triangles;
 	unsigned int VAO;
 
 	/*  Functions  */
 	// constructor
-	Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures)
+	Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures, vector<Triangle*> triangles)
 	{
 		this->vertices = vertices;
 		this->indices = indices;
 		this->textures = textures;
+		this->triangles = vector<Triangle*>(triangles);
 
 		// now that we have all the required data, set the vertex buffers and its attribute pointers.
 		setupMesh();

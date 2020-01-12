@@ -5,6 +5,7 @@
 class SceneObject
 {
 public:
+
 	Model* model;
 
 	SceneObject(Model* model) : mModel(model)
@@ -58,6 +59,8 @@ public:
 	void calculateBoundingBox()
 	{
 		vector<Vertex> ObjectVertices = getVerticesInWorld();
+
+		if (ObjectVertices.size() == 0) return;
 
 		glm::vec3 tempMax;
 		glm::vec3 tempMin = tempMax = ObjectVertices[0].Position;

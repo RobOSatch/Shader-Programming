@@ -14,6 +14,7 @@
 
 #include "interpolation.h"
 #include "KDTree.h"
+#include "Timer.h"
 
 #include <iostream>
 
@@ -89,6 +90,8 @@ bool isFirstRender = true;
 Shader *lämpShader;
 KDTree kdTree;
 
+bool isPerformanceMode = false;
+
 void drawLineBox(glm::vec3 minP, glm::vec3 maxP, Shader *usingShader, glm::mat4 view, glm::mat4 proj, unsigned int lightVAO)
 {
 	glm::vec3 scale = maxP - minP;
@@ -107,8 +110,13 @@ void drawLineBox(glm::vec3 minP, glm::vec3 maxP, Shader *usingShader, glm::mat4 
 	glDrawArrays(GL_LINES, 0, 42);
 }
 
+int drawDepth = 0;
+int drawCounter = 0;
+
 void drawKDTree(KDNode* node, glm::mat4 view, glm::mat4 projection)
 {
+	/*if (drawCounter <= 0) return;
+	else drawCounter--;*/
 	if (node->aabb == nullptr) return;
 
 	drawLineBox(node->aabb->mMinPoint, node->aabb->mMaxPoint, lämpShader, view, projection, lightVAO);
@@ -122,388 +130,430 @@ void drawKDTree(KDNode* node, glm::mat4 view, glm::mat4 projection)
 	return;
 }
 
+int setupOpenGL()
+{
+	glfwInit();
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+	// glfw window creation
+	// --------------------
+	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Camera Ride", NULL, NULL);
+	glfwMakeContextCurrent(window);
+
+	// glad: load all OpenGL function pointers
+	// ---------------------------------------
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	{
+		std::cout << "Failed to initialize GLAD" << std::endl;
+		return -1;
+	}
+
+	glEnable(GL_DEPTH_TEST);
+	return 0;
+}
+
 int main()
 {
-	while (!shouldQuit) {
+	if (isPerformanceMode)
+	{
+		if (setupOpenGL() == -1) return -1;
 
-		// glfw: initialize and configure
-		// ------------------------------
-		glfwInit();
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-		glfwWindowHint(GLFW_SAMPLES, samples);
+		mainScene = Scene();
+		glm::mat4 transform = glm::mat4(1.0f);
+		Model* model = new Model("resources/objects/performance/tris.obj");
+		mainScene.addSceneObject(model, transform, 1.0, nullptr);
+		
+		Timer::start();
+		kdTree = KDTree(&mainScene);
+		kdTree.construct(kdTree.root, 0);
+		Timer::stop();
+	}
+	else
+	{
+		while (!shouldQuit) {
 
-		switch (AAMode) {
-		case 0:
-			glfwWindowHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-		case 1:
-			glfwWindowHint(GL_LINE_SMOOTH_HINT, GL_FASTEST);
-		}
+			// glfw: initialize and configure
+			// ------------------------------
+			glfwInit();
+			glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+			glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+			glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+			glfwWindowHint(GLFW_SAMPLES, samples);
 
-		// glfw window creation
-		// --------------------
-		GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Camera Ride", NULL, NULL);
-		if (window == NULL)
-		{
-			std::cout << "Failed to create GLFW window" << std::endl;
-			glfwTerminate();
-			return -1;
-		}
-		glfwMakeContextCurrent(window);
-		glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-		glfwSetCursorPosCallback(window, mouse_callback);
-		glfwSetScrollCallback(window, scroll_callback);
-		glfwSetKeyCallback(window, key_callback);
-		glfwSetMouseButtonCallback(window, mouse_button_callback);
-
-		// tell GLFW to capture our mouse
-		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
-		// glad: load all OpenGL function pointers
-		// ---------------------------------------
-		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-		{
-			std::cout << "Failed to initialize GLAD" << std::endl;
-			return -1;
-		}
-
-		//glfwWindowHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-
-		// configure global opengl state
-		// -----------------------------
-		glEnable(GL_DEPTH_TEST);
-
-		// build and compile shaders
-	   // -------------------------
-		Shader shader("lightShader.vert", "lightShader.frag");
-		Shader depthShader("shadowMappingDepth.vert", "shadowMappingDepth.frag");
-		lämpShader = new Shader("lampShader.vert", "lampShader.frag");
-
-		float vertices[] = {
-	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0.0f,  0.0f, -1.0f,
-	 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,  0.0f,  0.0f, -1.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  0.0f,  0.0f, -1.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  0.0f,  0.0f, -1.0f,
-	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  0.0f, -1.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0.0f,  0.0f, -1.0f,
-
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  0.0f,  0.0f, 1.0f,
-	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,  0.0f,  0.0f, 1.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,  0.0f,  0.0f, 1.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,  0.0f,  0.0f, 1.0f,
-	-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,  0.0f,  0.0f, 1.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  0.0f,  0.0f, 1.0f,
-
-	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  -1.0f,  0.0f,  0.0f,
-	-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  -1.0f,  0.0f,  0.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  -1.0f,  0.0f,  0.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  -1.0f,  0.0f,  0.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  -1.0f,  0.0f,  0.0f,
-	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  -1.0f,  0.0f,  0.0f,
-
-	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  1.0f,  0.0f,  0.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  1.0f,  0.0f,  0.0f,
-	 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  1.0f,  0.0f,  0.0f,
-	 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  1.0f,  0.0f,  0.0f,
-	 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  1.0f,  0.0f,  0.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  1.0f,  0.0f,  0.0f,
-
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  0.0f, -1.0f,  0.0f,
-	 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,  0.0f, -1.0f,  0.0f,
-	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,  0.0f, -1.0f,  0.0f,
-	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,  0.0f, -1.0f,  0.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  0.0f, -1.0f,  0.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  0.0f, -1.0f,  0.0f,
-
-	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  1.0f,  0.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  0.0f,  1.0f,  0.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  0.0f,  1.0f,  0.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  0.0f,  1.0f,  0.0f,
-	-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,  0.0f,  1.0f,  0.0f,
-	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  1.0f,  0.0f,
-
-
-	//For Lines
-	 0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0.0f,  0.0f, -1.0f,
-	 0.5f, -0.5f, 0.5f,  1.0f, 0.0f,  0.0f,  0.0f, -1.0f,
-	 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  0.0f, -1.0f,
-	 0.5f,  0.5f, -0.5f,  0.0f, 0.0f,  0.0f,  0.0f, -1.0f,
-	-0.5f,  0.5f, 0.5f,  0.0f, 1.0f,  0.0f,  0.0f, -1.0f,
-	 0.5f,  0.5f, 0.5f,  0.0f, 0.0f,  0.0f,  0.0f, -1.0f,
-
-		};
-
-		// set up vertex data (and buffer(s)) and configure vertex attributes
-		// ------------------------------------------------------------------
-		float planeVertices[] = {
-			// positions            // normals         // texcoords
-			 25.0f, -0.5f,  25.0f,  0.0f, 1.0f, 0.0f,  25.0f,  0.0f,
-			-25.0f, -0.5f,  25.0f,  0.0f, 1.0f, 0.0f,   0.0f,  0.0f,
-			-25.0f, -0.5f, -25.0f,  0.0f, 1.0f, 0.0f,   0.0f, 25.0f,
-
-			 25.0f, -0.5f,  25.0f,  0.0f, 1.0f, 0.0f,  25.0f,  0.0f,
-			-25.0f, -0.5f, -25.0f,  0.0f, 1.0f, 0.0f,   0.0f, 25.0f,
-			 25.0f, -0.5f, -25.0f,  0.0f, 1.0f, 0.0f,  25.0f, 10.0f
-		};
-
-		// plane VAO
-		unsigned int planeVBO;
-		glGenVertexArrays(1, &planeVAO);
-		glGenBuffers(1, &planeVBO);
-		glBindVertexArray(planeVAO);
-		glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), planeVertices, GL_STATIC_DRAW);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-		glBindVertexArray(0);
-
-		//light
-		glGenBuffers(1, &VBO);
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-		glGenVertexArrays(1, &lightVAO);
-		glBindVertexArray(lightVAO);
-
-		// we only need to bind to the VBO (to link it with glVertexAttribPointer), no need to fill it; the VBO's data already contains all we need (it's already bound, but we do it again for educational purposes)
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5 * sizeof(float)));
-		glEnableVertexAttribArray(2);
-
-		// load textures
-		// -------------
-		unsigned int woodTexture = loadTexture("resources/textures/wood.png");
-		boxTexture = loadTexture("resources/textures/container2.png");
-		wallTexture = loadTexture("resources/textures/brickwall.jpg");
-		normalMap = loadTexture("resources/textures/brickwall_normal.jpg");
-
-		secondTexture = loadTexture("resources/textures/metalTex.jpg");
-		secondNormalMap = loadTexture("resources/textures/metalNormal.jpg");
-
-		// configure depth map FBO
-		// -----------------------
-		const unsigned int SHADOW_WIDTH = 8192, SHADOW_HEIGHT = 8192;
-		unsigned int depthMapFBO;
-		glGenFramebuffers(1, &depthMapFBO);
-		// create depth texture
-		unsigned int depthMap;
-		glGenTextures(1, &depthMap);
-		glBindTexture(GL_TEXTURE_2D, depthMap);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-		float borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
-		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-		// attach depth texture as FBO's depth buffer
-		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
-		glDrawBuffer(GL_NONE);
-		glReadBuffer(GL_NONE);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		shader.use();
-		shader.setInt("diffuseTexture", 0);
-		shader.setInt("normalMap", 1);
-		shader.setInt("shadowMap", 2);
-
-		std::vector<glm::vec3> curvePoints;
-
-		// Model stuff
-		cube = new Model("resources/objects/cube/cube.obj");
-
-		int currentWaypoint = 0;
-		float t = 0.0f;
-
-		// render loop
-		// -----------
-		while (!glfwWindowShouldClose(window))
-		{
-			if (msaa) glEnable(GL_MULTISAMPLE);
-			else glDisable(GL_MULTISAMPLE);
-
-			if ((previousSamples != samples) || (previousAAMode != AAMode)) {
-				previousSamples = samples;
-				previousAAMode = AAMode;
-				firstMouse = true;
-				glfwTerminate();
-				break;
+			switch (AAMode) {
+			case 0:
+				glfwWindowHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+			case 1:
+				glfwWindowHint(GL_LINE_SMOOTH_HINT, GL_FASTEST);
 			}
 
-			float currentFrame = glfwGetTime();
-			deltaTime = currentFrame - lastFrame;
-			lastFrame = currentFrame;
+			// glfw window creation
+			// --------------------
+			GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Camera Ride", NULL, NULL);
+			if (window == NULL)
+			{
+				std::cout << "Failed to create GLFW window" << std::endl;
+				glfwTerminate();
+				return -1;
+			}
+			glfwMakeContextCurrent(window);
+			glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+			glfwSetCursorPosCallback(window, mouse_callback);
+			glfwSetScrollCallback(window, scroll_callback);
+			glfwSetKeyCallback(window, key_callback);
+			glfwSetMouseButtonCallback(window, mouse_button_callback);
 
-			processInput(window);
+			// tell GLFW to capture our mouse
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-			// render
-			// ------
-			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			// glad: load all OpenGL function pointers
+			// ---------------------------------------
+			if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+			{
+				std::cout << "Failed to initialize GLAD" << std::endl;
+				return -1;
+			}
 
-			// render to depth map
-			glm::mat4 lightProjection, lightView;
-			glm::mat4 lightSpaceMatrix;
-			float near_plane = 1.0f, far_plane = 7.5f;
-			lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-			lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
-			lightSpaceMatrix = lightProjection * lightView;
-			depthShader.use();
-			depthShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
+			//glfwWindowHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 
-			glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+			// configure global opengl state
+			// -----------------------------
+			glEnable(GL_DEPTH_TEST);
+
+			// build and compile shaders
+		   // -------------------------
+			Shader shader("lightShader.vert", "lightShader.frag");
+			Shader depthShader("shadowMappingDepth.vert", "shadowMappingDepth.frag");
+			lämpShader = new Shader("lampShader.vert", "lampShader.frag");
+
+			float vertices[] = {
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0.0f,  0.0f, -1.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,  0.0f,  0.0f, -1.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  0.0f,  0.0f, -1.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  0.0f,  0.0f, -1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  0.0f, -1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0.0f,  0.0f, -1.0f,
+
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  0.0f,  0.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,  0.0f,  0.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,  0.0f,  0.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,  0.0f,  0.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,  0.0f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  0.0f,  0.0f, 1.0f,
+
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  -1.0f,  0.0f,  0.0f,
+		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  -1.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  -1.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  -1.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  -1.0f,  0.0f,  0.0f,
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  -1.0f,  0.0f,  0.0f,
+
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  1.0f,  0.0f,  0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  1.0f,  0.0f,  0.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  1.0f,  0.0f,  0.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  1.0f,  0.0f,  0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  1.0f,  0.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  1.0f,  0.0f,  0.0f,
+
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  0.0f, -1.0f,  0.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,  0.0f, -1.0f,  0.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,  0.0f, -1.0f,  0.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,  0.0f, -1.0f,  0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  0.0f, -1.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  0.0f, -1.0f,  0.0f,
+
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  0.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  0.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  0.0f,  1.0f,  0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,  0.0f,  1.0f,  0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  1.0f,  0.0f,
+
+
+		//For Lines
+		 0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0.0f,  0.0f, -1.0f,
+		 0.5f, -0.5f, 0.5f,  1.0f, 0.0f,  0.0f,  0.0f, -1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  0.0f, -1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f, 0.0f,  0.0f,  0.0f, -1.0f,
+		-0.5f,  0.5f, 0.5f,  0.0f, 1.0f,  0.0f,  0.0f, -1.0f,
+		 0.5f,  0.5f, 0.5f,  0.0f, 0.0f,  0.0f,  0.0f, -1.0f,
+
+			};
+
+			// set up vertex data (and buffer(s)) and configure vertex attributes
+			// ------------------------------------------------------------------
+			float planeVertices[] = {
+				// positions            // normals         // texcoords
+				 25.0f, -0.5f,  25.0f,  0.0f, 1.0f, 0.0f,  25.0f,  0.0f,
+				-25.0f, -0.5f,  25.0f,  0.0f, 1.0f, 0.0f,   0.0f,  0.0f,
+				-25.0f, -0.5f, -25.0f,  0.0f, 1.0f, 0.0f,   0.0f, 25.0f,
+
+				 25.0f, -0.5f,  25.0f,  0.0f, 1.0f, 0.0f,  25.0f,  0.0f,
+				-25.0f, -0.5f, -25.0f,  0.0f, 1.0f, 0.0f,   0.0f, 25.0f,
+				 25.0f, -0.5f, -25.0f,  0.0f, 1.0f, 0.0f,  25.0f, 10.0f
+			};
+
+			// plane VAO
+			unsigned int planeVBO;
+			glGenVertexArrays(1, &planeVAO);
+			glGenBuffers(1, &planeVBO);
+			glBindVertexArray(planeVAO);
+			glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), planeVertices, GL_STATIC_DRAW);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+			glEnableVertexAttribArray(2);
+			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+			glBindVertexArray(0);
+
+			//light
+			glGenBuffers(1, &VBO);
+			glBindBuffer(GL_ARRAY_BUFFER, VBO);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+			glGenVertexArrays(1, &lightVAO);
+			glBindVertexArray(lightVAO);
+
+			// we only need to bind to the VBO (to link it with glVertexAttribPointer), no need to fill it; the VBO's data already contains all we need (it's already bound, but we do it again for educational purposes)
+			glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5 * sizeof(float)));
+			glEnableVertexAttribArray(2);
+
+			// load textures
+			// -------------
+			unsigned int woodTexture = loadTexture("resources/textures/wood.png");
+			boxTexture = loadTexture("resources/textures/container2.png");
+			wallTexture = loadTexture("resources/textures/brickwall.jpg");
+			normalMap = loadTexture("resources/textures/brickwall_normal.jpg");
+
+			secondTexture = loadTexture("resources/textures/metalTex.jpg");
+			secondNormalMap = loadTexture("resources/textures/metalNormal.jpg");
+
+			// configure depth map FBO
+			// -----------------------
+			const unsigned int SHADOW_WIDTH = 8192, SHADOW_HEIGHT = 8192;
+			unsigned int depthMapFBO;
+			glGenFramebuffers(1, &depthMapFBO);
+			// create depth texture
+			unsigned int depthMap;
+			glGenTextures(1, &depthMap);
+			glBindTexture(GL_TEXTURE_2D, depthMap);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+			float borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+			glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+			// attach depth texture as FBO's depth buffer
 			glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-			glClear(GL_DEPTH_BUFFER_BIT);
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, wallTexture);
-			renderScene(depthShader);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+			glDrawBuffer(GL_NONE);
+			glReadBuffer(GL_NONE);
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-			// reset viewport
-			glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-			// 2. render scene as normal using the generated depth/shadow map  
-			// --------------------------------------------------------------
-			glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			shader.use();
-			glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-			glm::mat4 view = camera.GetViewMatrix();
-			shader.setMat4("projection", projection);
-			shader.setMat4("view", view);
-			// set light uniforms
-			shader.setVec3("viewPos", camera.Position);
-			shader.setVec3("lightPos", lightPos);
-			shader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
-			shader.setFloat("bumpiness", bumpiness);
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, wallTexture);
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, normalMap);
-			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_2D, depthMap);
+			shader.setInt("diffuseTexture", 0);
+			shader.setInt("normalMap", 1);
+			shader.setInt("shadowMap", 2);
 
-			renderScene(shader);
+			std::vector<glm::vec3> curvePoints;
 
-			// KD-Tree
-			if (isFirstRender) {
-				kdTree = KDTree(&mainScene);
-				kdTree.construct(kdTree.root, 0);
-			}
+			// Model stuff
+			cube = new Model("resources/objects/cube/cube.obj");
 
-			drawKDTree(kdTree.root, view, projection);
+			int currentWaypoint = 0;
+			float t = 0.0f;
 
-			isFirstRender = false;
-
-			/*vector<AABB> allAABB = mainScene.getAllAABB();
-			for (AABB bb : allAABB)
+			// render loop
+			// -----------
+			while (!glfwWindowShouldClose(window))
 			{
-				drawLineBox(bb.mMinPoint, bb.mMaxPoint, lämpShader, view, projection, lightVAO);
-			}*/
+				if (msaa) glEnable(GL_MULTISAMPLE);
+				else glDisable(GL_MULTISAMPLE);
 
-			if (gameMode == RIDE) {
-				// Visualize curve
-				glm::vec3 pos;
-				/*if (visualize) {
-					for (int i = 0; i < waypoints.size() - 1; i++) {
-						for (float p = 0.0f; p <= 1.0f; p += 0.01f) {
-							if (i == 0) {
-								pos = interpolation::catmullRomSpline(waypoints[i], waypoints[i], waypoints[i + 1], waypoints[i + 2], p);
-							}
-							else if (i == waypoints.size() - 2) {
-								pos = interpolation::catmullRomSpline(waypoints[i - 1], waypoints[i], waypoints[i + 1], waypoints[i + 1], p);
-							}
-							else {
-								pos = interpolation::catmullRomSpline(waypoints[i - 1], waypoints[i], waypoints[i + 1], waypoints[i + 2], p);
-							}
+				if ((previousSamples != samples) || (previousAAMode != AAMode)) {
+					previousSamples = samples;
+					previousAAMode = AAMode;
+					firstMouse = true;
+					glfwTerminate();
+					break;
+				}
 
-							pos.y -= 0.1f;
-							model = glm::mat4(1.0f);
-							model = glm::translate(model, pos);
-							model = glm::scale(model, glm::vec3(0.05f));
-							lampShader.setMat4("model", model);
+				float currentFrame = glfwGetTime();
+				deltaTime = currentFrame - lastFrame;
+				lastFrame = currentFrame;
 
-							glDrawArrays(GL_TRIANGLES, 0, 36);
-						}
-					}
+				processInput(window);
+
+				// render
+				// ------
+				glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+				// render to depth map
+				glm::mat4 lightProjection, lightView;
+				glm::mat4 lightSpaceMatrix;
+				float near_plane = 1.0f, far_plane = 7.5f;
+				lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+				lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+				lightSpaceMatrix = lightProjection * lightView;
+				depthShader.use();
+				depthShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
+
+				glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+				glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+				glClear(GL_DEPTH_BUFFER_BIT);
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, wallTexture);
+				renderScene(depthShader);
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+				// reset viewport
+				glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+				// 2. render scene as normal using the generated depth/shadow map  
+				// --------------------------------------------------------------
+				glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				shader.use();
+				glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+				glm::mat4 view = camera.GetViewMatrix();
+				shader.setMat4("projection", projection);
+				shader.setMat4("view", view);
+				// set light uniforms
+				shader.setVec3("viewPos", camera.Position);
+				shader.setVec3("lightPos", lightPos);
+				shader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
+				shader.setFloat("bumpiness", bumpiness);
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, wallTexture);
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, normalMap);
+				glActiveTexture(GL_TEXTURE2);
+				glBindTexture(GL_TEXTURE_2D, depthMap);
+
+				renderScene(shader);
+
+				// KD-Tree
+				if (isFirstRender) {
+					kdTree = KDTree(&mainScene);
+					kdTree.construct(kdTree.root, 0);
+				}
+
+				drawCounter = drawDepth;
+				drawKDTree(kdTree.root, view, projection);
+
+				isFirstRender = false;
+
+				/*vector<AABB> allAABB = mainScene.getAllAABB();
+				for (AABB bb : allAABB)
+				{
+					drawLineBox(bb.mMinPoint, bb.mMaxPoint, lämpShader, view, projection, lightVAO);
 				}*/
 
-				// Draw splines
-				glm::vec3 nextPosition;
-				glm::quat nextOrientation;
-				if (t <= 1.0f && currentWaypoint != waypoints.size() - 1) {
-					float e = 0.1;
-					bool done = false;
+				if (gameMode == RIDE) {
+					// Visualize curve
+					glm::vec3 pos;
+					/*if (visualize) {
+						for (int i = 0; i < waypoints.size() - 1; i++) {
+							for (float p = 0.0f; p <= 1.0f; p += 0.01f) {
+								if (i == 0) {
+									pos = interpolation::catmullRomSpline(waypoints[i], waypoints[i], waypoints[i + 1], waypoints[i + 2], p);
+								}
+								else if (i == waypoints.size() - 2) {
+									pos = interpolation::catmullRomSpline(waypoints[i - 1], waypoints[i], waypoints[i + 1], waypoints[i + 1], p);
+								}
+								else {
+									pos = interpolation::catmullRomSpline(waypoints[i - 1], waypoints[i], waypoints[i + 1], waypoints[i + 2], p);
+								}
 
-					while (!done) {
-						if (currentWaypoint == 0) {
-							nextPosition = interpolation::catmullRomSpline(waypoints[currentWaypoint], waypoints[currentWaypoint], waypoints[currentWaypoint + 1], waypoints[currentWaypoint + 2], t);
-							nextOrientation = interpolation::squad(orientations[currentWaypoint], orientations[currentWaypoint], orientations[currentWaypoint + 1], orientations[currentWaypoint + 2], t);
+								pos.y -= 0.1f;
+								model = glm::mat4(1.0f);
+								model = glm::translate(model, pos);
+								model = glm::scale(model, glm::vec3(0.05f));
+								lampShader.setMat4("model", model);
+
+								glDrawArrays(GL_TRIANGLES, 0, 36);
+							}
 						}
-						else if (currentWaypoint == waypoints.size() - 2) {
-							nextPosition = interpolation::catmullRomSpline(waypoints[currentWaypoint - 1], waypoints[currentWaypoint], waypoints[currentWaypoint + 1], waypoints[currentWaypoint + 1], t);
-							nextOrientation = interpolation::squad(orientations[currentWaypoint - 1], orientations[currentWaypoint], orientations[currentWaypoint + 1], orientations[currentWaypoint + 1], t);
+					}*/
+
+					// Draw splines
+					glm::vec3 nextPosition;
+					glm::quat nextOrientation;
+					if (t <= 1.0f && currentWaypoint != waypoints.size() - 1) {
+						float e = 0.1;
+						bool done = false;
+
+						while (!done) {
+							if (currentWaypoint == 0) {
+								nextPosition = interpolation::catmullRomSpline(waypoints[currentWaypoint], waypoints[currentWaypoint], waypoints[currentWaypoint + 1], waypoints[currentWaypoint + 2], t);
+								nextOrientation = interpolation::squad(orientations[currentWaypoint], orientations[currentWaypoint], orientations[currentWaypoint + 1], orientations[currentWaypoint + 2], t);
+							}
+							else if (currentWaypoint == waypoints.size() - 2) {
+								nextPosition = interpolation::catmullRomSpline(waypoints[currentWaypoint - 1], waypoints[currentWaypoint], waypoints[currentWaypoint + 1], waypoints[currentWaypoint + 1], t);
+								nextOrientation = interpolation::squad(orientations[currentWaypoint - 1], orientations[currentWaypoint], orientations[currentWaypoint + 1], orientations[currentWaypoint + 1], t);
+							}
+							else {
+								nextPosition = interpolation::catmullRomSpline(waypoints[currentWaypoint - 1], waypoints[currentWaypoint], waypoints[currentWaypoint + 1], waypoints[currentWaypoint + 2], t);
+								nextOrientation = interpolation::squad(orientations[currentWaypoint - 1], orientations[currentWaypoint], orientations[currentWaypoint + 1], orientations[currentWaypoint + 2], t);
+							}
+
+							glm::vec3 direction = nextPosition - camera.Position;
+							float distance = glm::length(direction);
+
+							if (distance <= speed + 0.1 && distance >= speed - 0.1) {
+								done = true;
+								camera.Position = nextPosition;
+								camera.Orientation = nextOrientation;
+
+								// SLERP
+								//camera.Orientation = glm::slerp(firstQuat, secondQuat, t);
+							}
+
+							t += e * deltaTime * speed;
+
+							if (distance >= 5.0f) {
+								camera.Position = nextPosition;
+								done = true;
+							}
 						}
-						else {
-							nextPosition = interpolation::catmullRomSpline(waypoints[currentWaypoint - 1], waypoints[currentWaypoint], waypoints[currentWaypoint + 1], waypoints[currentWaypoint + 2], t);
-							nextOrientation = interpolation::squad(orientations[currentWaypoint - 1], orientations[currentWaypoint], orientations[currentWaypoint + 1], orientations[currentWaypoint + 2], t);
-						}
+					}
 
-						glm::vec3 direction = nextPosition - camera.Position;
-						float distance = glm::length(direction);
+					if (t >= 1.0f) {
+						t = 0.0f;
+						currentWaypoint++;
+					}
 
-						if (distance <= speed + 0.1 && distance >= speed - 0.1) {
-							done = true;
-							camera.Position = nextPosition;
-							camera.Orientation = nextOrientation;
-
-							// SLERP
-							//camera.Orientation = glm::slerp(firstQuat, secondQuat, t);
-						}
-
-						t += e * deltaTime * speed;
-
-						if (distance >= 5.0f) {
-							camera.Position = nextPosition;
-							done = true;
-						}
+					if (currentWaypoint == waypoints.size() - 1) {
+						waypoints.clear();
+						orientations.clear();
+						gameMode = CREATE;
+						currentWaypoint = 0;
 					}
 				}
 
-				if (t >= 1.0f) {
-					t = 0.0f;
-					currentWaypoint++;
-				}
-
-				if (currentWaypoint == waypoints.size() - 1) {
-					waypoints.clear();
-					orientations.clear();
-					gameMode = CREATE;
-					currentWaypoint = 0;
-				}
+				// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+				// -------------------------------------------------------------------------------
+				glfwSwapBuffers(window);
+				glfwPollEvents();
 			}
 
-			// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-			// -------------------------------------------------------------------------------
-			glfwSwapBuffers(window);
-			glfwPollEvents();
+			// glfw: terminate, clearing all previously allocated GLFW resources.
+			// ------------------------------------------------------------------
+			glfwTerminate();
 		}
-
-		// glfw: terminate, clearing all previously allocated GLFW resources.
-		// ------------------------------------------------------------------
-		glfwTerminate();
 	}
 
 	return 0;
@@ -516,13 +566,15 @@ void renderScene(const Shader& shader)
 	glm::mat4 model = glm::mat4(1.0f);
 	//model = glm::rotate(model, glm::radians((float)glfwGetTime() * -30.f), glm::normalize(glm::vec3(1.0, 0.0, 1.0)));
 	shader.setMat4("model", model);
-	renderWalls();
+	//renderWalls();
 	
 	// Draw fancy stuff
 	for (int i = 1; i < 10; i++) {
 		for (int j = 1; j < 10; j++) {
 			model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(2.0f * i, -1.5f, 2.0f * j));
+			//model = glm::translate(model, glm::vec3(2.0f * i, -1.5f, 2.0f * j));
+			model = glm::translate(model, glm::vec3(0.0 - i * 5.0, 1.0 + (2 * cos(i * 1.0) + 2 * cos(j * 1.0)), 2.0 - j * 5.0));
+			model = glm::rotate(model, (1 + i * -j) * 5000000 / 10000.f, glm::vec3(glm::abs(cos(i)), glm::abs(cos(j)), 0));
 			shader.setMat4("model", model);
 
 			if (isFirstRender) mainScene.addSceneObject(cube, model, 1, nullptr);
@@ -531,7 +583,9 @@ void renderScene(const Shader& shader)
 			if ((i == 1 && j == 1) || (i == 9 && j == 9) || (i == 1 && j == 9) || (i == 9 && j == 1)) {
 				for (int k = 0; k < 5; k++) {
 					model = glm::mat4(1.0f);
-					model = glm::translate(model, glm::vec3(2.0f * i, -1.5f + 2.0f * k, 2.0f * j));
+					//model = glm::translate(model, glm::vec3(2.0f * i, -1.5f + 2.0f * k, 2.0f * j));
+					model = glm::translate(model, glm::vec3(0.0 - i * 5.0, 1.0 + (2 * cos(i * 1.0) + 2 * cos(j * 1.0)), 2.0 - j * 5.0));
+					model = glm::rotate(model, (1 + i * -j) * 5000000 / 10000.f, glm::vec3(glm::abs(cos(i)), glm::abs(cos(j)), 0));
 					shader.setMat4("model", model);
 					
 					if (isFirstRender) mainScene.addSceneObject(cube, model, 1, nullptr);
@@ -819,6 +873,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
 		msaa = !msaa;
 	}
+
+	if (glfwGetKey(window, GLFW_KEY_KP_ADD) == GLFW_PRESS) drawDepth += 10;
+	if (glfwGetKey(window, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS) drawDepth -= 10;
 }
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)

@@ -20,6 +20,7 @@ void KDNode::getNodeAABB()
 
 float KDNode::getAxisMedian()
 {
+	if (vertices.size() == 0) return 0.0f;
 	vector<float> axisCoordinates;
 
 	for (Vertex v : vertices) {

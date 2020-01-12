@@ -12,11 +12,10 @@ KDTree::KDTree(Scene* scene)
 
 void KDTree::construct(KDNode* node, int depth)
 {
-	if (node->vertices.size() <= 50 || depth > 10) {
+	if (node->vertices.size() <= 10 || depth > 10) {
 		return;
 	}
 
-	// Get Axis with maximum distance and then get the median vertex position in respect to the axis.
 	node->axis = node->aabb->getMaxExtentAxis();
 	node->axisPos = node->getAxisMedian();
 
@@ -24,9 +23,12 @@ void KDTree::construct(KDNode* node, int depth)
 	KDNode* left = new KDNode(split.leftSplit);
 	KDNode* right = new KDNode(split.rightSplit);
 
-	++depth;
+	depth++;
 	node->left = left;
 	node->right = right;
+
+	node->aabb->splitAABB(node->left->aabb, node->right->aabb, node->axis, node->axisPos);
+
 	construct(left, depth);
 	construct(right, depth);
 

@@ -146,6 +146,7 @@ private:
 		vector<unsigned int> indices;
 		vector<Triangle> faces;
 		vector<Texture> textures;
+		vector<Triangle*> triangles;
 
 		// Walk through each of the mesh's vertices
 		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
@@ -174,25 +175,36 @@ private:
 			}
 			else
 				vertex.TexCoords = glm::vec2(0.0f, 0.0f);
-			// tangent
-			vector.x = mesh->mTangents[i].x;
-			vector.y = mesh->mTangents[i].y;
-			vector.z = mesh->mTangents[i].z;
-			vertex.Tangent = vector;
-			// bitangent
-			vector.x = mesh->mBitangents[i].x;
-			vector.y = mesh->mBitangents[i].y;
-			vector.z = mesh->mBitangents[i].z;
-			vertex.Bitangent = vector;
-			vertices.push_back(vertex);
+			if (mesh->mTangents)
+			{
+				// tangent
+				vector.x = mesh->mTangents[i].x;
+				vector.y = mesh->mTangents[i].y;
+				vector.z = mesh->mTangents[i].z;
+				vertex.Tangent = vector;
+				// bitangent
+				vector.x = mesh->mBitangents[i].x;
+				vector.y = mesh->mBitangents[i].y;
+				vector.z = mesh->mBitangents[i].z;
+				vertex.Bitangent = vector;
+				vertices.push_back(vertex);
+			}
 		}
 		// now walk through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
 		for (unsigned int i = 0; i < mesh->mNumFaces; i++)
 		{
 			aiFace face = mesh->mFaces[i];
 			// retrieve all indices of the face and store them in the indices vector
+			
+			auto* temp = new Triangle();
+
 			for (unsigned int j = 0; j < face.mNumIndices; j++)
+			{
 				indices.push_back(face.mIndices[j]);
+				temp->indices.emplace_back(face.mIndices[j]);
+				vertices[face.mIndices[j]].triangles.emplace_back(temp);
+			}
+			triangles.emplace_back(temp);
 		}
 		// process materials
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
@@ -217,7 +229,7 @@ private:
 		textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
 		// return a mesh object created from the extracted mesh data
-		return Mesh(vertices, indices, textures);
+		return Mesh(vertices, indices, textures, triangles);
 	}
 
 	// checks all material textures of a given type and loads the textures if they're not loaded yet.

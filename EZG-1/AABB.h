@@ -80,6 +80,7 @@ public:
 
 	void splitAABB(AABB* lower, AABB* higher, int axis, float pos)
 	{
+		if (lower == nullptr || higher == nullptr) return;
 		glm::vec3 lowCutPlanePos = mMinPoint;
 		glm::vec3 highCutPlanePos = mMaxPoint;
 
@@ -97,14 +98,12 @@ public:
 			highCutPlanePos.z = pos;
 			break;
 		default:
-			//std::cout << "Wrong Dimension";
 			break;
 		}
 		lower->mMinPoint = mMinPoint;
 		lower->mMaxPoint = highCutPlanePos;
 		higher->mMinPoint = lowCutPlanePos;
 		higher->mMaxPoint = mMaxPoint;
-
 	}
 
 

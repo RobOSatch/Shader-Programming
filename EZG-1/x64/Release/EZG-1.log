@@ -1,0 +1,20 @@
+﻿  EZG-1.cpp
+C:\Users\robar\source\repos\EZG-1\EZG-1\Shader.h(4,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+C:\Users\robar\source\repos\EZG-1\EZG-1\Mesh.h(100,1): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+C:\Users\robar\source\repos\EZG-1\EZG-1\KDTree.h(2,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(392,24): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(496,20): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(467,16): warning C4101: 'pos': unreferenced local variable
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(905,11): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(906,11): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(913,16): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(914,16): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(916,10): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(917,10): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\robar\source\repos\EZG-1\EZG-1\EZG-1.cpp(930,28): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+  Generating code
+  2 of 1269 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    8 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  EZG-1.vcxproj -> C:\Users\robar\source\repos\EZG-1\x64\Release\EZG-1.exe
