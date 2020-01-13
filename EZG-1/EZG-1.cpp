@@ -334,8 +334,6 @@ int main()
 
 			// load textures
 			// -------------
-			unsigned int woodTexture = loadTexture("resources/textures/wood.png");
-			boxTexture = loadTexture("resources/textures/container2.png");
 			wallTexture = loadTexture("resources/textures/brickwall.jpg");
 			normalMap = loadTexture("resources/textures/brickwall_normal.jpg");
 
