@@ -16,6 +16,7 @@ public:
 	KDNode* right;
 	vector<Vertex> vertices;
 	AABB* aabb;
+	bool hit = false;
 
 	KDNode(vector<Vertex> vertices);
 	

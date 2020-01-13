@@ -15,6 +15,7 @@
 #include "interpolation.h"
 #include "KDTree.h"
 #include "Timer.h"
+#include "Ray.h"
 
 #include <iostream>
 
@@ -40,7 +41,7 @@ const unsigned int SCR_WIDTH = 1920;
 const unsigned int SCR_HEIGHT = 1080;
 
 // camera
-Camera camera(glm::vec3(9.5f, 1.0f, 9.5f));
+Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -92,7 +93,9 @@ KDTree kdTree;
 
 bool isPerformanceMode = false;
 
-void drawLineBox(glm::vec3 minP, glm::vec3 maxP, Shader *usingShader, glm::mat4 view, glm::mat4 proj, unsigned int lightVAO)
+glm::mat4 PV;
+
+void drawLineBox(glm::vec3 minP, glm::vec3 maxP, Shader *usingShader, glm::mat4 view, glm::mat4 proj, unsigned int lightVAO, glm::vec3 color)
 {
 	glm::vec3 scale = maxP - minP;
 	usingShader->use();
@@ -105,6 +108,7 @@ void drawLineBox(glm::vec3 minP, glm::vec3 maxP, Shader *usingShader, glm::mat4 
 	usingShader->setMat4("projection", proj);
 	usingShader->setMat4("view", view);
 	usingShader->setMat4("model", model);
+	usingShader->setVec3("color", color);
 
 	glBindVertexArray(lightVAO);
 	glDrawArrays(GL_LINES, 0, 42);
@@ -115,11 +119,12 @@ int drawCounter = 0;
 
 void drawKDTree(KDNode* node, glm::mat4 view, glm::mat4 projection)
 {
-	/*if (drawCounter <= 0) return;
-	else drawCounter--;*/
+	if (drawCounter <= 0) return;
+	else drawCounter--;
 	if (node->aabb == nullptr) return;
 
-	drawLineBox(node->aabb->mMinPoint, node->aabb->mMaxPoint, lämpShader, view, projection, lightVAO);
+	if (node->hit) drawLineBox(node->aabb->mMinPoint, node->aabb->mMaxPoint, lämpShader, view, projection, lightVAO, glm::vec3(1.0f, 0.0, 1.0f));
+	else drawLineBox(node->aabb->mMinPoint, node->aabb->mMaxPoint, lämpShader, view, projection, lightVAO, glm::vec3(1.0f, 1.0, 1.0f));
 
 	if (node->left == nullptr && node->right == nullptr) {
 		return;
@@ -127,7 +132,6 @@ void drawKDTree(KDNode* node, glm::mat4 view, glm::mat4 projection)
 
 	drawKDTree(node->left, view, projection);
 	drawKDTree(node->right, view, projection);
-	return;
 }
 
 int setupOpenGL()
@@ -443,6 +447,8 @@ int main()
 				glActiveTexture(GL_TEXTURE2);
 				glBindTexture(GL_TEXTURE_2D, depthMap);
 
+				PV = projection * view;
+
 				renderScene(shader);
 
 				// KD-Tree
@@ -456,39 +462,7 @@ int main()
 
 				isFirstRender = false;
 
-				/*vector<AABB> allAABB = mainScene.getAllAABB();
-				for (AABB bb : allAABB)
-				{
-					drawLineBox(bb.mMinPoint, bb.mMaxPoint, lämpShader, view, projection, lightVAO);
-				}*/
-
 				if (gameMode == RIDE) {
-					// Visualize curve
-					glm::vec3 pos;
-					/*if (visualize) {
-						for (int i = 0; i < waypoints.size() - 1; i++) {
-							for (float p = 0.0f; p <= 1.0f; p += 0.01f) {
-								if (i == 0) {
-									pos = interpolation::catmullRomSpline(waypoints[i], waypoints[i], waypoints[i + 1], waypoints[i + 2], p);
-								}
-								else if (i == waypoints.size() - 2) {
-									pos = interpolation::catmullRomSpline(waypoints[i - 1], waypoints[i], waypoints[i + 1], waypoints[i + 1], p);
-								}
-								else {
-									pos = interpolation::catmullRomSpline(waypoints[i - 1], waypoints[i], waypoints[i + 1], waypoints[i + 2], p);
-								}
-
-								pos.y -= 0.1f;
-								model = glm::mat4(1.0f);
-								model = glm::translate(model, pos);
-								model = glm::scale(model, glm::vec3(0.05f));
-								lampShader.setMat4("model", model);
-
-								glDrawArrays(GL_TRIANGLES, 0, 36);
-							}
-						}
-					}*/
-
 					// Draw splines
 					glm::vec3 nextPosition;
 					glm::quat nextOrientation;
@@ -606,6 +580,13 @@ void renderScene(const Shader& shader)
 	glBindTexture(GL_TEXTURE_2D, secondNormalMap);
 	glActiveTexture(GL_TEXTURE2);
 
+	if (isFirstRender) mainScene.addSceneObject(cube, model, 1, nullptr);
+	cube->Draw(shader);
+
+	model = glm::mat4(1.0f);
+	model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
+	model = glm::scale(model, glm::vec3(10.0f, 1.0f, 10.0f));
+	shader.setMat4("model", model);
 	if (isFirstRender) mainScene.addSceneObject(cube, model, 1, nullptr);
 	cube->Draw(shader);
 }
@@ -878,11 +859,32 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	if (glfwGetKey(window, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS) drawDepth -= 10;
 }
 
+void resetTreeHits(KDNode* node)
+{
+	if (node == nullptr) return;
+
+	node->hit = false;
+	resetTreeHits(node->left);
+	resetTreeHits(node->right);
+}
+
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && gameMode == CREATE) {
 		waypoints.push_back(camera.Position);
 		orientations.push_back(camera.Orientation);
+	}
+
+	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS && gameMode == CREATE) {
+		resetTreeHits(kdTree.root);
+
+		Ray ray = Ray();
+
+		ray.origin = camera.Position;
+		ray.direction = camera.Front;
+		ray.tMax = 100;
+
+		kdTree.intersectWith(ray);
 	}
 }
 
