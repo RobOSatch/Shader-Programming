@@ -166,8 +166,6 @@
   <ItemGroup>
     <ClCompile Include="EZG-1.cpp" />
     <ClCompile Include="glad.c" />
-    <ClCompile Include="KDNode.cpp" />
-    <ClCompile Include="KDTree.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneObject.cpp" />
     <ClCompile Include="stb_image.cpp" />
@@ -192,8 +190,6 @@
     <ClInclude Include="AABB.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="interpolation.h" />
-    <ClInclude Include="KDNode.h" />
-    <ClInclude Include="KDTree.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Ray.h" />
