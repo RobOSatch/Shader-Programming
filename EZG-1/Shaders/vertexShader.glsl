@@ -1,6 +1,5 @@
 #version 410 core
 layout (location = 0) in vec2 aPos;
-//layout (location = 1) in vec2 aTexCoords;
 
 out int instanceID;
 
@@ -22,30 +21,28 @@ out VS_OUT {
 } vs_out;
 
 uniform sampler3D densityTexture;
+uniform int cameraSector;
 
 
 void main()
 {
-    //instanceID = gl_InstanceID;   
-    vs_out.wsCoord = vec3(aPos.x, gl_InstanceID, aPos.y);
-    vs_out.uvw = vec3(aPos.x / densityTextureDimensions.x,  gl_InstanceID / densityTextureDimensions.z, aPos.y / densityTextureDimensions.y);
+    vs_out.wsCoord = vec3(aPos.x, aPos.y, cameraSector * (densityTextureDimensions.z - 1) + gl_InstanceID);
+    vs_out.uvw = vec3(aPos.x / densityTextureDimensions.x, aPos.y / densityTextureDimensions.y,  gl_InstanceID / densityTextureDimensions.z - 1);
 
-    vec3 step = vec3(1.0 /densityTextureDimensions.x, 0, 1.0 / densityTextureDimensions.y);
+    vec3 step = vec3(1.0 / densityTextureDimensions.x, 0, 1.0 / densityTextureDimensions.z);
     
-    vs_out.f0123 = vec4( texture(densityTexture, vs_out.uvw + step.yyy).x,
-    texture(densityTexture, vs_out.uvw + step.yyx).x,
-    texture(densityTexture, vs_out.uvw + step.xyx).x,
-    texture(densityTexture, vs_out.uvw + step.xyy).x );
-    vs_out.f4567 = vec4( texture(densityTexture, vs_out.uvw + step.yxy).x,
-    texture(densityTexture, vs_out.uvw + step.yxx).x,
-    texture(densityTexture, vs_out.uvw + step.xxx).x,
-    texture(densityTexture, vs_out.uvw + step.xxy).x );
+    vs_out.f0123 = vec4(texture(densityTexture, vs_out.uvw + step.yyy).x,
+        texture(densityTexture, vs_out.uvw + step.yyz).x,
+        texture(densityTexture, vs_out.uvw + step.xyz).x,
+        texture(densityTexture, vs_out.uvw + step.xyy).x);
+    vs_out.f4567 = vec4(texture(densityTexture, vs_out.uvw + step.yxy).x,
+        texture(densityTexture, vs_out.uvw + step.yxz).x,
+        texture(densityTexture, vs_out.uvw + step.xxz).x,
+        texture(densityTexture, vs_out.uvw + step.xxy).x);
 
-    // determine which of the 256 marching cubes cases we have forthis cell:
+    // determine marching cubes case
     uvec4 n0123 = uvec4(clamp(vs_out.f0123*99999, 0.0, 1.0));
     uvec4 n4567 = uvec4(clamp(vs_out.f4567*99999, 0.0, 1.0));
-    vs_out.mc_case = n0123.x + n0123.y * 2 +  n0123.z * 4 + n0123.w * 8 + n4567.x * 16 +  n4567.y * 32 + n4567.z * 64 + n4567.w * 128;
-    gl_Position = projection * view * model * vec4(aPos.x, gl_InstanceID, aPos.y, 1.0); 
-    // fill out return structusing these values, then on to the Geometry Shader.
-    //texCoords = aTexCoords;
+    vs_out.mc_case = (n0123.x) | (n0123.y << 1) | (n0123.z << 2) | (n0123.w << 3) | (n4567.x << 4) |  (n4567.y << 5) | (n4567.z << 6) | (n4567.w << 7);
+    gl_Position = projection * view * model * vec4(aPos.x, aPos.y, gl_InstanceID, 1.0);
 }

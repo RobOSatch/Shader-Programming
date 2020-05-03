@@ -117,8 +117,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>glfw;glad;KHR;assimpLib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;assimp-vc142-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>glfw;glad;KHR</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -159,46 +159,28 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>glfw;glad;KHR;assimpLib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;assimp-vc142-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>glfw;glad;KHR</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="EZG-1.cpp" />
     <ClCompile Include="glad.c" />
-    <ClCompile Include="Scene.cpp" />
-    <ClCompile Include="SceneObject.cpp" />
-    <ClCompile Include="stb_image.cpp" />
+    <ClCompile Include="ImageLoader.cpp" />
     <ClCompile Include="Timer.cpp" />
-    <ClCompile Include="Triangle.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="debugQuad.frag" />
-    <None Include="debugQuad.vert" />
-    <None Include="fragmentShader.frag" />
-    <None Include="lampShader.frag" />
-    <None Include="lampShader.vert" />
-    <None Include="lightShader.frag" />
-    <None Include="lightShader.vert" />
-    <None Include="materials.frag" />
-    <None Include="materials.vert" />
-    <None Include="shadowMappingDepth.frag" />
-    <None Include="shadowMappingDepth.vert" />
-    <None Include="vertexShader.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AABB.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="ImageLoader.h" />
     <ClInclude Include="interpolation.h" />
-    <ClInclude Include="Mesh.h" />
-    <ClInclude Include="Model.h" />
-    <ClInclude Include="Ray.h" />
-    <ClInclude Include="Scene.h" />
-    <ClInclude Include="SceneObject.h" />
     <ClInclude Include="Shader.h" />
-    <ClInclude Include="stb_image.h" />
     <ClInclude Include="Timer.h" />
-    <ClInclude Include="Triangle.h" />
+    <ClInclude Include="triangulation.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\displacementPS.glsl" />
+    <None Include="Shaders\displacementVS.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
