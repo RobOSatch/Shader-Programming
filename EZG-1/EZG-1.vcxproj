@@ -181,6 +181,12 @@
   <ItemGroup>
     <None Include="Shaders\displacementPS.glsl" />
     <None Include="Shaders\displacementVS.glsl" />
+    <None Include="Shaders\particleRenderGS.glsl" />
+    <None Include="Shaders\particleRenderPS.glsl" />
+    <None Include="Shaders\particleRenderVS.glsl" />
+    <None Include="Shaders\particleTransformGS.glsl" />
+    <None Include="Shaders\particleTransformPS.glsl" />
+    <None Include="Shaders\particleTransformVS.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

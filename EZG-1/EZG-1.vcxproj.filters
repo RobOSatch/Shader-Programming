@@ -54,5 +54,11 @@
   <ItemGroup>
     <None Include="Shaders\displacementVS.glsl" />
     <None Include="Shaders\displacementPS.glsl" />
+    <None Include="Shaders\particleRenderVS.glsl" />
+    <None Include="Shaders\particleRenderGS.glsl" />
+    <None Include="Shaders\particleRenderPS.glsl" />
+    <None Include="Shaders\particleTransformVS.glsl" />
+    <None Include="Shaders\particleTransformPS.glsl" />
+    <None Include="Shaders\particleTransformGS.glsl" />
   </ItemGroup>
 </Project>

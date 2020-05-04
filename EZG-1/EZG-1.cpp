@@ -23,6 +23,76 @@
 
 #include <iostream>
 
+#include "stb/stb_image.h"
+
+const unsigned int MAX_PARTICLES = 10000000;
+const unsigned int EMITTER_COUNT = 10;
+
+Shader* particleRenderShader;
+Shader* particleTransformShader;
+unsigned int particleVBO[2];
+unsigned int particleTFB[2];
+//unsigned int particleVAO;
+unsigned int randomTexture;
+
+bool spawnParticles = false;
+glm::vec3 spawnParticlePosition = glm::vec3(0.f, 0.f, 0.f);
+
+int currVB = 0;
+int currTFB = 1;
+
+struct Particle
+{
+	glm::vec3 position;
+	glm::vec3 velocity;
+	float lifeTime;
+	float type;
+};
+
+void SetupParticles()
+{
+	auto* particles = new Particle[MAX_PARTICLES];
+	for (int i = 0; i < EMITTER_COUNT; i++)
+	{
+		//position
+		particles[i].position = glm::vec3(i / 10.f, 1.f, 0.f);
+
+		//velocity
+		particles[i].velocity = glm::vec3(0.f, 0.f, 0.f);
+
+		//lifetime
+		particles[i].lifeTime = float(i) / 10.f;
+
+		//type
+		particles[i].type = 0;
+	}
+
+
+
+	glGenBuffers(2, particleVBO);
+	glGenTransformFeedbacks(2, particleTFB);
+	for (unsigned int i = 0; i < 2; i++) {
+		glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, particleTFB[i]);
+		glBindBuffer(GL_ARRAY_BUFFER, particleVBO[i]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(Particle) * MAX_PARTICLES, particles, GL_DYNAMIC_DRAW);
+		glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, particleVBO[i]);
+	}
+
+	delete[] particles;
+
+	/*glGenVertexArrays(1, &particleVAO);
+	glBindVertexArray(particleVAO);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GL_FLOAT) * 8, 0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(GL_FLOAT) * 8, (void*)(sizeof(float) * 3));
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(GL_FLOAT) * 8, (void*)(sizeof(float) * 6));
+	glEnableVertexAttribArray(3);
+	glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(GL_FLOAT) * 8, (void*)(sizeof(float) * 7));
+	glBindVertexArray(0);*/
+}
+
 enum Game_Mode {
 	CREATE,
 	RIDE
@@ -151,9 +221,21 @@ float getRandomNumber(float min, float max)
 void loadShaders()
 {
 	reload = true;
+
 	marchingCubesShader = new Shader("Shaders/vertexShader.glsl", "Shaders/fragmentShader.glsl", "Shaders/geometryShader.glsl");
 	densityComputeShader = new Shader("Shaders/densityCS.glsl");
 	displacementShader = new Shader("Shaders/displacementVS.glsl", "Shaders/displacementPS.glsl");
+
+	// Particle shader
+	particleRenderShader = new Shader("Shaders/particleRenderVS.glsl", "Shaders/particleRenderPS.glsl", "Shaders/particleRenderGS.glsl");
+
+	const GLchar* varyings[4];
+	varyings[0] = "outPosition";
+	varyings[1] = "outVelocity";
+	varyings[2] = "outLifeTime";
+	varyings[3] = "outType";
+
+	particleTransformShader = new Shader("Shaders/particleTransformVS.glsl", "Shaders/particleTransformPS.glsl", "Shaders/particleTransformGS.glsl", varyings, 4);
 }
 
 void renderQuad()
@@ -256,7 +338,7 @@ int main()
 	// ------------------------------
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// glfw window creation
@@ -292,6 +374,9 @@ int main()
 	// -----------------------------
 	glEnable(GL_DEPTH_TEST);
 
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	// Initialize points cloud
 	for (int i = 0; i < textureWidth - 1; ++i)
 	{
@@ -302,6 +387,9 @@ int main()
 			points.push_back(float(j) * pointScale);
 		}
 	}
+
+	loadShaders();
+	SetupParticles();
 	
 	glGenBuffers(1, &VBO);
 	glGenVertexArrays(1, &VAO);
@@ -315,7 +403,6 @@ int main()
 	glBindVertexArray(0);
 
 	// Creates the two density textures
-	loadShaders();
 	glEnable(GL_TEXTURE_3D);
 	glGenTextures(1, &densityTextureA);
 	glBindTexture(GL_TEXTURE_3D, densityTextureA);
@@ -367,8 +454,11 @@ int main()
 	glBindTexture(GL_TEXTURE_BUFFER, mcTableTexture);
 	glTexBuffer(GL_TEXTURE_BUFFER, GL_R32I, mcTableBuffer);
 	
-	//glBindTexture(GL_TEXTURE_3D, 0);
-	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindTexture(GL_TEXTURE_3D, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	//------------ PARTICLES ----------------
+	// TODO
 
 	//____________________TEXTURES__________________
 
@@ -410,6 +500,24 @@ int main()
 	ImageLoader::setDefault2DTextureFromData(normalZ, width, height, data);
 	ImageLoader::freeImage((data));
 
+	// ok???
+	srand(int("unsinn"));
+
+	glm::vec3* pRandomData = new glm::vec3[1000];
+	for (unsigned int i = 0; i < 1000; i++) {
+		pRandomData[i].x = (rand() % 10000) / 10000.f;
+		pRandomData[i].y = (rand() % 10000) / 10000.f;
+		pRandomData[i].z = (rand() % 10000) / 10000.f;
+	}
+
+	glGenTextures(1, &randomTexture);
+	glBindTexture(GL_TEXTURE_1D, randomTexture);
+	glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB, 1000, 0, GL_RGB, GL_FLOAT, pRandomData);
+	glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+
+	delete[] pRandomData;
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -462,7 +570,7 @@ int main()
 			densityComputeShader->setInt("texturePosition", cameraSector - 1);
 			glBindTexture(GL_TEXTURE_3D, densityTextureB);
 			glBindImageTexture(0, densityTextureB, 0, GL_TRUE, 0, GL_READ_WRITE, GL_R16F);
-
+			
 			glDispatchCompute(textureWidth, textureHeight, textureDepth);
 			glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 		}
@@ -548,6 +656,85 @@ int main()
 
 		renderQuad();
 
+		// -------------- PARTICLE RENDER ----------------------
+		particleTransformShader->use();
+		particleTransformShader->setFloat("deltaTime", deltaTime);
+		particleTransformShader->setFloat("programTime", glfwGetTime());
+		particleTransformShader->setVec3("spawnPosition", spawnParticlePosition);
+		particleTransformShader->setBool("spawnNewEmitter", spawnParticles);
+
+		glActiveTexture(0);
+		glBindTexture(GL_TEXTURE_1D, randomTexture);
+
+		glEnable(GL_RASTERIZER_DISCARD);
+		//glBindVertexArray(particleVAO);
+
+
+
+		glBindBuffer(GL_ARRAY_BUFFER, particleVBO[currVB]);
+		glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, particleTFB[currTFB]);
+
+		//updated with new particles
+
+
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Particle), 0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)(sizeof(float) * 3));
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)(sizeof(float) * 6));
+		glEnableVertexAttribArray(3);
+		glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)(sizeof(float) * 7));
+
+		glBeginTransformFeedback(GL_POINTS);
+
+
+		if (isFirstRender) {
+			glDrawArrays(GL_POINTS, 0, EMITTER_COUNT);
+
+			isFirstRender = false;
+		}
+		else {
+			glDrawTransformFeedback(GL_POINTS, particleTFB[currVB]);
+		}
+
+		//glDrawArrays(GL_POINTS, 0, 1);	
+		glEndTransformFeedback();
+		glDisableVertexAttribArray(0);
+		glDisableVertexAttribArray(1);
+		glDisableVertexAttribArray(2);
+		glDisableVertexAttribArray(3);
+
+
+		glDisable(GL_RASTERIZER_DISCARD);
+
+		if (spawnParticles)
+		{
+			spawnParticles = false;
+		}
+
+		particleRenderShader->use();
+
+		particleRenderShader->setMat4("projection", projection);
+		particleRenderShader->setMat4("view", view);
+		particleRenderShader->setMat4("model", model);
+
+		glBindBuffer(GL_ARRAY_BUFFER, particleVBO[currTFB]);
+
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Particle), 0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)(sizeof(float) * 3));
+		glEnableVertexAttribArray(3);
+		glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)(sizeof(float) * 7));
+		glDrawTransformFeedback(GL_POINTS, particleTFB[currTFB]);
+		glDisableVertexAttribArray(0);
+		glDisableVertexAttribArray(1);
+		glDisableVertexAttribArray(3);
+
+		currTFB = currVB;
+		currVB = (currTFB + 1) & 1;
+
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------
 		glfwSwapBuffers(window);
@@ -622,6 +809,12 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 		waypoints.push_back(camera.Position);
 		orientations.push_back(camera.Orientation);
 	}
+
+	if (button == GLFW_MOUSE_BUTTON_MIDDLE)
+	{
+		std::cout << "PARTICLES" << std::endl;
+		spawnParticles = true;
+	}
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -672,5 +865,37 @@ void scroll_callback(GLFWwindow * window, double xoffset, double yoffset)
 // ---------------------------------------------------
 unsigned int loadTexture(char const* path)
 {
-	return 0;
+	unsigned int textureID;
+	glGenTextures(1, &textureID);
+
+	int width, height, nrComponents;
+	unsigned char* data = stbi_load(path, &width, &height, &nrComponents, 0);
+	if (data)
+	{
+		GLenum format;
+		if (nrComponents == 1)
+			format = GL_RED;
+		else if (nrComponents == 3)
+			format = GL_RGB;
+		else if (nrComponents == 4)
+			format = GL_RGBA;
+
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		stbi_image_free(data);
+	}
+	else
+	{
+		std::cout << "Texture failed to load at path: " << path << std::endl;
+		stbi_image_free(data);
+	}
+
+	return textureID;
 }
