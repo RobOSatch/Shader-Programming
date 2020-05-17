@@ -14,7 +14,7 @@ out GS_Out{
 		vec2 texCoord;
 } gs_out;
 
-float size = 0.1f;
+float size = 3.f;
 
 void buildParticle(vec4 position)
 {

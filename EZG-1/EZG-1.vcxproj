@@ -167,6 +167,7 @@
     <ClCompile Include="EZG-1.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="ImageLoader.cpp" />
+    <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -179,6 +180,8 @@
     <ClInclude Include="triangulation.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Shaders\basicPS.glsl" />
+    <None Include="Shaders\basicVS.glsl" />
     <None Include="Shaders\displacementPS.glsl" />
     <None Include="Shaders\displacementVS.glsl" />
     <None Include="Shaders\particleRenderGS.glsl" />

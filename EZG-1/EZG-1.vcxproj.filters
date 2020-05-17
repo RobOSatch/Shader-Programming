@@ -27,6 +27,9 @@
     <ClCompile Include="ImageLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader.h">
@@ -60,5 +63,7 @@
     <None Include="Shaders\particleTransformVS.glsl" />
     <None Include="Shaders\particleTransformPS.glsl" />
     <None Include="Shaders\particleTransformGS.glsl" />
+    <None Include="Shaders\basicVS.glsl" />
+    <None Include="Shaders\basicPS.glsl" />
   </ItemGroup>
 </Project>
